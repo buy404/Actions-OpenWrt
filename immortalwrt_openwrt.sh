@@ -3,7 +3,7 @@
 qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases | grep -oP '(?<="browser_download_url": ").*?release-\K\d+\.\d+\.\d+' | sort -Vr | head -n 1 || "")
 libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases | grep -oP '(?<="browser_download_url": ").*?release-\d+\.\d+\.\d+_v\K\d+\.\d+\.\d+' | sort -Vr | head -n 1 || "")
 curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'browser_download_url": "\K[^"]*cache[^"]*' >xa
-curl -sL api.github.com/repos/hong0980/OpenWrt-Cache/releases | grep -oP 'browser_download_url": "\K[^"]*cache[^"]*' >xc
+#curl -sL api.github.com/repos/hong0980/OpenWrt-Cache/releases | grep -oP 'browser_download_url": "\K[^"]*cache[^"]*' >xc
 
 mkdir firmware output 2>/dev/null
 destination_dir="package/A"
