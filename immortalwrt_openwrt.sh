@@ -294,12 +294,12 @@ cat >>.config <<-EOF
 	CONFIG_PACKAGE_default-settings-chn=y
 	CONFIG_DEFAULT_SETTINGS_OPTIMIZE_FOR_CHINESE=y
 	# CONFIG_LUCI_SRCDIET is not set #压缩 Lua 源代码
-	## CONFIG_LUCI_JSMIN is not set  #压缩 JavaScript 源代码
+	# CONFIG_LUCI_JSMIN is not set  #压缩 JavaScript 源代码
 	# CONFIG_LUCI_CSSTIDY is not set #压缩 CSS 文件
 EOF
 
 config_generate="package/base-files/files/bin/config_generate"
-color cy "自定义设置.... "
+color cy "自定义设置"
 wget -qO package/base-files/files/etc/banner git.io/JoNK8
 sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_NAME-$(TZ=UTC-8 date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
 sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
