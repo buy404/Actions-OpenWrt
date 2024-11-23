@@ -151,30 +151,26 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        if [[ $DEPENDS == 'ImmortalWrt' ]]; then
-          wget -qO- is.gd/build_environment | sudo bash
-        else
-          ( sudo -E apt-get -qq update
-          sudo -E apt-get -qq install ack antlr3 aria2 asciidoc autoconf automake autopoint binutils \
-          bison build-essential bzip2 ccache clang cmake cpio curl device-tree-compiler fastjar flex \
-          g++ gawk gcc-multilib gettext git gperf haveged help2man intltool libc6-dev-i386 libelf-dev \
-          libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev \
-          libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip \
-          p7zip-full patch pkgconf python2.7 python3 python3-distutils python3-pyelftools python3-pip \
-          python3-ply python3-docutils python3-pyelftools quilt re2c rename rsync scons squashfs-tools \
-          subversion swig texinfo uglifyjs unzip upx-ucl vim wget xmlto xxd zip zlib1g-dev
-          sudo -E apt-get -qq purge android* azure-cli dotnet* firefox ghc* google* hhvm llvm* mysql* \
-          openjdk* php* powershell zulu*
-          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo -E apt-get -qq autoremove --purge
-          sudo -E apt-get -qq clean ) &
-        fi
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install ack antlr3 aria2 asciidoc autoconf automake autopoint binutils \
+        bison build-essential bzip2 ccache clang cmake cpio curl device-tree-compiler fastjar flex \
+        g++ gawk gcc-multilib gettext git gperf haveged help2man intltool libc6-dev-i386 libelf-dev \
+        libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev \
+        libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip \
+        p7zip-full patch pkgconf python2.7 python3 python3-distutils python3-pyelftools python3-pip \
+        python3-ply python3-docutils python3-pyelftools quilt re2c rename rsync scons squashfs-tools \
+        subversion swig texinfo uglifyjs unzip upx-ucl vim wget xmlto xxd zip zlib1g-dev
+        sudo -E apt-get -qq purge android* azure-cli dotnet* firefox ghc* google* hhvm llvm* mysql* \
+        openjdk* php* powershell zulu*
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
         sudo -E timedatectl set-timezone "Asia/Shanghai"
 
     - name: 部署
       continue-on-error: true
       # run: wget -qO- git.io/J6IXO | bash
-      run: wget -qO- is.gd/immortalwrt_openwrt | bash
+      run: bash immortalwrt_openwrt.sh
 
     - name: Cache
       uses: stupidloud/cachewrtbuild@main
@@ -190,12 +186,14 @@ jobs:
       continue-on-error: true
       if: env.CACHE_ACTIONS == 'true' && !cancelled()
       id: tools
-      run: cd $REPO_FLODER && (make -j$(nproc) toolchain/compile || make -j1 V=s toolchain/compile)
+      run: |
+        cd $REPO_FLODER
+        make -j$(nproc) toolchain/compile || make -j1 V=s toolchain/compile
 
     - name: 保存 Cache
       id: fetch_cache
       if: (env.FETCH_CACHE == 'true' || steps.tools.conclusion == 'success') && !cancelled()
-      run: wget -qO- git.io/lean_openwrt | bash
+      run: bash lean_openwrt.sh
 
     - name: Cache 上传到 Release
       continue-on-error: true
@@ -211,8 +209,8 @@ jobs:
     - name: 下载软件包
       run: |
         cd $REPO_FLODER
-        # make package/download -j16
-        n=0; while true; do make package/download -j && break || (n=$((n+1)); [ $n -eq 3 ] && break); done
+        make package/download -j16
+        #n=0; while true; do make package/download -j && break || (n=$((n+1)); [ $n -eq 3 ] && break); done
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
