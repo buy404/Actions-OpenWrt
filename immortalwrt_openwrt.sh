@@ -28,23 +28,17 @@ status() {
         `echo -e "$(color cy $STEP_NAME) [ $(color cg ✔) ]${_date}"`
     else
         printf "%-62s %s %s %s %s %s %s %s\n" \
-        `echo -e "$(color cy $1) [ $(color cr ✕) ]${_date}"`
+        `echo -e "$(color cy $STEP_NAME) [ $(color cr ✕) ]${_date}"`
     fi
 }
 
 _find() {
-    find $1 -maxdepth 5 -type d -name "$2" -print -quit 2>/dev/null
+    find $1 -maxdepth 3 -type d -name "$2" -print -quit 2>/dev/null
 }
 
 _packages() {
     for z in $@; do
         [[ $z =~ ^# ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
-    done
-}
-
-_delpackage() {
-    for z in $@; do
-        [[ $z =~ ^# ]] || sed -i -E "s/(CONFIG_PACKAGE_.*$z)=y/# \1 is not set/" .config
     done
 }
 
