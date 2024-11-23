@@ -7,6 +7,8 @@ curl -sL $GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases | grep -oP '"browser_
 curl -sL api.github.com/repos/hong0980/OpenWrt-Cache/releases | grep -oP '"browser_download_url": "\K[^"]*cache[^"]*' >xc
 
 mkdir firmware output 2>/dev/null
+destination_dir="package/A"
+[[ -d "$destination_dir" ]] || mkdir -p $destination_dir
 
 color() {
     case $1 in
@@ -315,12 +317,10 @@ sed -i "s/ImmortalWrt/OpenWrt/g" {$config_generate,include/version.mk}
 sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
 sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$pn1ABFaI\$vt5cmIjlr6M7Z79Eds2lV0:16821:0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
 
-# git diff ./ >> ../output/t.patch || true
 clone_all https://github.com/hong0980/build
 #clone_all https://github.com/sbwml/openwrt_helloworld
-clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_all https://github.com/fw876/helloworld
-
+clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
@@ -510,7 +510,6 @@ case "$TARGET_DEVICE" in
         #AmuleWebUI-Reloaded htop lscpu lsscsi lsusb nano pciutils screen webui-aria2 zstd pv
         #subversion-client #unixodbc #git-http
         "
-        # [[ $REPO_BRANCH = "openwrt-18.06-k5.4" ]] && sed -i '/KERNEL_PATCHVER/s/=.*/=5.10/' target/linux/x86/Makefile
         wget -qO package/base-files/files/bin/bpm git.io/bpm && chmod +x package/base-files/files/bin/bpm
         wget -qO package/base-files/files/bin/ansi git.io/ansi && chmod +x package/base-files/files/bin/ansi
         [[ $REPO_BRANCH == master ]] && rm -rf package/kernel/rt*
@@ -599,24 +598,18 @@ for p in package/A/luci-app*/po feeds/luci/applications/luci-app*/po; do
     [[ -L $p/zh_Hans || -L $p/zh-cn ]] || (ln -s zh-cn $p/zh_Hans 2>/dev/null || ln -s zh_Hans $p/zh-cn 2>/dev/null)
 done
 
-# mv -f package/A/luci-app* feeds/luci/applications/
-
 [[ "$REPO_BRANCH" =~ master ]] && sed -i '/deluge/d' .config
 sed -i '/bridge\|vssr\|deluge/d' .config
-STEP_NAME='更新配置....'; BEGIN_TIME=$(date '+%H:%M:%S')
+
+STEP_NAME='更新配置'; BEGIN_TIME=$(date '+%H:%M:%S')
 make defconfig 1>/dev/null 2>&1
 status
 
 LINUX_VERSION=$(grep 'CONFIG_LINUX.*=y' .config | sed -r 's/CONFIG_LINUX_(.*)=y/\1/' | tr '_' '.')
 echo -e "$(color cy 当前机型) $(color cb $SOURCE_NAME-${REPO_BRANCH#*-}-$LINUX_VERSION-${DEVICE_NAME}${VERSION:+-$VERSION})"
 sed -i "/IMG_PREFIX:/ {s/=/=$SOURCE_NAME-${REPO_BRANCH#*-}-$LINUX_VERSION-\$(shell TZ=UTC-8 date +%m%d-%H%M)-/}" include/image.mk
-# sed -i -E 's/# (CONFIG_.*_COMPRESS_UPX) is not set/\1=y/' .config && make defconfig 1>/dev/null 2>&1
 
-# echo "SSH_ACTIONS=true" >>$GITHUB_ENV #SSH后台
-# echo "UPLOAD_PACKAGES=false" >>$GITHUB_ENV
-# echo "UPLOAD_SYSUPGRADE=false" >>$GITHUB_ENV
 echo "UPLOAD_BIN_DIR=false" >>$GITHUB_ENV
-# echo "UPLOAD_FIRMWARE=false" >>$GITHUB_ENV
 echo "UPLOAD_COWTRANSFER=false" >>$GITHUB_ENV
 echo "UPLOAD_WETRANSFER=false" >>$GITHUB_ENV
 echo "CLEAN=false" >>$GITHUB_ENV
