@@ -52,6 +52,7 @@ _delpackage() {
 _printf() {
     awk '{printf "%s %-40s %s %s %s\n" ,$1,$2,$3,$4,$5}'
 }
+
 git_clone() {
     local repo_url branch
     if [[ "$1" == */* ]]; then
@@ -117,7 +118,7 @@ clone_dir() {
     rm -rf $temp_dir
 }
 
-clone_dir() {
+clone_all() {
     local repo_url branch
     if [[ "$1" == */* ]]; then
         repo_url="$1"
@@ -132,13 +133,9 @@ clone_dir() {
         echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | _printf
         return 0
     }
-    for target_dir in "$@"; do
+    for target_dir in $(ls -l $temp_dir/$@ | awk '/^d/{print $NF}'); do
         local source_dir current_dir
         source_dir=$(_find "$temp_dir" "$target_dir")
-        [[ -d "$source_dir" ]] || {
-            echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
-            continue
-        }
         current_dir=$(_find "package/ feeds/ target/" "$target_dir")
         if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
