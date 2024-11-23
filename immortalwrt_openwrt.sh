@@ -326,7 +326,7 @@ clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
 clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
 clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static
-clone_dir https://github.com/master UnblockNeteaseMusic/luci-app-unblockneteasemusic luci-app-unblockneteasemusic
+clone_dir https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic luci-app-unblockneteasemusic
 clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm lua-maxminddb \
     luci-app-bypass luci-app-store luci-app-pushbot taskd
 
@@ -531,12 +531,12 @@ esac
     # [[ $TARGET_DEVICE =~ ^r ]] && \
     # sed -i "s|VERSION.*|VERSION-5.4 = .273|; s|HASH.*|HASH-5.4.273 = 8ba0cfd3faa7222542b30791def49f426d7b50a07217366ead655a5687534743|" include/kernel-5.4
     clone_dir https://github.com/immortalwrt/packages nghttp3 ngtcp2 bash
-    clone_dir https://github.com/openwrt-23.05 immortalwrt/immortalwrt busybox ppp automount openssl \
+    clone_dir openwrt-23.05 https://github.com/immortalwrt/immortalwrt busybox ppp automount openssl \
         dnsmasq nftables libnftnl sonfilter opkg fullconenat \
         #fstools odhcp6c iptables ipset dropbear usbmode
-    clone_dir https://github.com/openwrt-23.05 immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
+    clone_dir openwrt-23.05 https://github.com/immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
         lua-openssl smartdns bluez curl #miniupnpc miniupnpd
-    clone_dir https://github.com/openwrt-23.05 immortalwrt/luci luci-app-syncdial luci-app-mwan3
+    clone_dir openwrt-23.05 https://github.com/immortalwrt/luci luci-app-syncdial luci-app-mwan3
 	cat <<-\EOF >>package/kernel/linux/modules/netfilter.mk
 	define KernelPackage/nft-tproxy
 	  SUBMENU:=$(NF_MENU)
