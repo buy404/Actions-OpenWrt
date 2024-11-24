@@ -179,9 +179,6 @@ jobs:
       id: organize
       if: steps.compile.conclusion == 'success' && !cancelled()
       run: |
-        echo "======================="
-        echo "磁盘使用情况:"
-        echo "======================="
         df -hT
         cd $REPO_FLODER
         echo "======================="
@@ -191,7 +188,7 @@ jobs:
         du -h --max-depth=1 ./ --exclude=bin --exclude=build_dir --exclude=staging_dir --exclude=bin
         ls bin/targets/*/*/
         sf=${CACHE_NAME%%-*}-${REPO_BRANCH#*-}-$(TZ=UTC-8 date +%m-%d)
-        ARCH=`awk -F'"' '/ARCH_PACKAGES/{print $2}' .config`
+        ARCH=$(awk -F '"' '/ARCH_PACKAGES/{print $2}' .config)
         [[ $FIRMWARE_TYPE ]] && cp -v $(find bin/targets/ -type f -name "*${FIRMWARE_TYPE}*") ../firmware && echo "upload_firmware=true" >>$GITHUB_ENV || true
         tar -zcPf ../firmware/$sf-$ARCH-packages.tar.gz bin/packages/ && echo "upload_packages=true" >>$GITHUB_ENV || true
         cd ../firmware && md5sum * >$sf-$TARGET_DEVICE-md5-config.txt || true
