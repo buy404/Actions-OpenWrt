@@ -111,6 +111,9 @@ jobs:
         sudo mkfs.btrfs -L combinedisk $LV_NAME
         sudo mount -o compress=zstd $LV_NAME $GITHUB_WORKSPACE
         sudo chown -R runner:runner $GITHUB_WORKSPACE && df -hT
+        mkdir -m 0777 -p $GITHUB_WORKSPACE/tmp
+        sudo cp -rp /tmp/* $GITHUB_WORKSPACE/tmp || true
+        sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
 
     - name: 安装编译依赖
       env:
