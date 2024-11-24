@@ -395,7 +395,7 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
     git_clone https://github.com/yaof2/luci-app-ikoolproxy
     git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
 
-    rm -rf feeds/*/*/{luci-app-appfilter,open-app-filter}
+    rm -rf feeds/*/*/luci-app-appfilter
 
     mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
     grep -q "8.8" $mwan3 && sed -i '/8.8/d' $mwan3
