@@ -257,11 +257,10 @@ TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
 CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
-curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >cache_url
 
-if (grep -q "$CACHE_NAME" cache_url); then
+if [ -n $CACHE_URL ]; then
     STEP_NAME='下载toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
-    wget -qc -t=3 $(grep "$CACHE_NAME" cache_url)
+    wget -qc -t=3 $CACHE_URL
     [ -e *.tzst ]; status
     [ -e *.tzst ] && {
         STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
