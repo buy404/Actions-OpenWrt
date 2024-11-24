@@ -532,7 +532,7 @@ esac
 
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
     clone_dir https://github.com/immortalwrt/packages nghttp3 ngtcp2 bash
-    clone_dir openwrt-23.05 https://github.com/immortalwrt/immortalwrt busybox pp2 automount openssl \
+    clone_dir openwrt-23.05 https://github.com/immortalwrt/immortalwrt busybox ppp automount openssl \
         dnsmasq nftables libnftnl opkg fullconenat \
         #fstools odhcp6c iptables ipset dropbear usbmode
     clone_dir openwrt-23.05 https://github.com/immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
