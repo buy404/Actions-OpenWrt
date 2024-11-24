@@ -257,10 +257,11 @@ TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
 CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
+curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >cache_url
 
-if [[ $CACHE_URL =~ $TOOLS_HASH ]]; then
+if (grep -q "$CACHE_NAME" cache_url); then
     STEP_NAME='下载toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
-    wget -qc -t=3 $CACHE_URL
+    wget -qc -t=3 $(grep "$CACHE_NAME" cache_url)
     [ -e *.tzst ]; status
     [ -e *.tzst ] && {
         STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
@@ -532,8 +533,6 @@ case "$TARGET_DEVICE" in
 esac
 
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
-    # [[ $TARGET_DEVICE =~ ^r ]] && \
-    # sed -i "s|VERSION.*|VERSION-5.4 = .273|; s|HASH.*|HASH-5.4.273 = 8ba0cfd3faa7222542b30791def49f426d7b50a07217366ead655a5687534743|" include/kernel-5.4
     clone_dir https://github.com/immortalwrt/packages nghttp3 ngtcp2 bash
     clone_dir openwrt-23.05 https://github.com/immortalwrt/immortalwrt busybox ppp automount openssl \
         dnsmasq nftables libnftnl opkg fullconenat \
