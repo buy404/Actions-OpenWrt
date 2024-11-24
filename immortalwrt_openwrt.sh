@@ -391,7 +391,7 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
 	))
 	EOF
 
-    clone_all https://github.com/destan19/OpenAppFilter
+    clone_dir https://github.com/destan19/OpenAppFilter luci-app-oaf oaf
     git_clone https://github.com/yaof2/luci-app-ikoolproxy
     git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
 
