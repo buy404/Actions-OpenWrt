@@ -218,7 +218,7 @@ config (){
 REPO_URL="https://github.com/immortalwrt/immortalwrt"
 STEP_NAME='拉取编译源码'; BEGIN_TIME=$(date '+%H:%M:%S')
 [ "$REPO_BRANCH" -a "$REPO_BRANCH" != "master" ] && BRANCH="-b $REPO_BRANCH --single-branch"
-git clone -q $BRANCH $REPO_URL $REPO_FLODER # --depth 1
+git clone -q $BRANCH $REPO_URL $REPO_FLODER
 status
 [[ -d $REPO_FLODER ]] && cd $REPO_FLODER || exit
 
@@ -231,14 +231,13 @@ case "$TARGET_DEVICE" in
 esac
 
 SOURCE_NAME=$(basename $(dirname $REPO_URL))
-export TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
-export CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
+TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
+CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 
-if (grep -q "$CACHE_NAME" ../xa || grep -q "$CACHE_NAME" ../xc); then
+if (grep -q "$CACHE_NAME" ../xa); then
     STEP_NAME='下载toolchain-cache'; BEGIN_TIME=$(date '+%H:%M:%S')
-    grep -q "$CACHE_NAME" ../xa && \
-    wget -qc -t=3 $(grep "$CACHE_NAME" ../xa) || wget -qc -t=3 $(grep "$CACHE_NAME" ../xc)
+    wget -qc -t=3 $(grep "$CACHE_NAME" ../xa)
     status
     [ -e *.tzst ] && {
         STEP_NAME='部署toolchain-cache'; BEGIN_TIME=$(date '+%H:%M:%S')
