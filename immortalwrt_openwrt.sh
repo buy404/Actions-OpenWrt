@@ -232,22 +232,21 @@ CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
 curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >xa
-if (grep -q "$CACHE_NAME" ../xa); then
-    STEP_NAME='下载toolchain-cache'; BEGIN_TIME=$(date '+%H:%M:%S')
-    wget -qc -t=3 $(grep "$CACHE_NAME" ../xa)
+if (grep -q "$CACHE_NAME" xa); then
+    STEP_NAME='下载toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
+    wget -qc -t=3 $(grep "$CACHE_NAME" xa)
     status
     [ -e *.tzst ] && {
-        STEP_NAME='部署toolchain-cache'; BEGIN_TIME=$(date '+%H:%M:%S')
-        (tar -I unzstd -xf *.tzst || tar -xf *.tzst) && {
-            sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
-        }
-        [ -d staging_dir ]; status
+        STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
+        tar -I unzstd -xf *.tzst || tar -xf *.tzst
+        [ -d staging_dir ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
+        status
     }
 else
     echo "CACHE_ACTIONS=true" >>$GITHUB_ENV
 fi
 
-STEP_NAME='更新软件....'; BEGIN_TIME=$(date '+%H:%M:%S')
+STEP_NAME='更新&安装软件'; BEGIN_TIME=$(date '+%H:%M:%S')
 ./scripts/feeds update -a 1>/dev/null 2>&1
 ./scripts/feeds install -a 1>/dev/null 2>&1
 status
@@ -291,7 +290,7 @@ cat >>.config <<-EOF
 EOF
 
 config_generate="package/base-files/files/bin/config_generate"
-color cy "自定义设置"
+color cy "加载自定义设置"
 wget -qO package/base-files/files/etc/banner git.io/JoNK8
 sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_NAME-$(TZ=UTC-8 date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
 sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
