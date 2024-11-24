@@ -147,7 +147,7 @@ jobs:
         ccache: true
         clean: ${{ env.CLEAN }}
         mixkey: ${{ env.CACHE_NAME }}
-        prefix: ${{ GITHUB_WORKSPACE }}/${{ env.REPO_FLODER }}
+        prefix: ${{ GITHUB.WORKSPACE }}/${{ env.REPO_FLODER }}
 
     - name: Compile Toolchain
       if: env.CACHE_ACTIONS == 'true' && !cancelled()
