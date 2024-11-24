@@ -47,7 +47,7 @@ _find() {
 
 _packages() {
     for z in $@; do
-        [[ $z =~ ^# ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
+        [[ $z =~ "^#" ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
     done
 }
 
@@ -110,7 +110,7 @@ clone_dir() {
 
     for target_dir in "$@"; do
         local source_dir current_dir destination_dir
-        [[ $target_dir =~ ^# ]] && continue
+        [[ $target_dir =~ "^#" ]] && continue
         source_dir=$(_find "$temp_dir" "$target_dir")
         [[ -d "$source_dir" ]] || \
         source_dir=$(find "$temp_dir" -maxdepth 4 -type d -name "$target_dir" -print -quit) && \
