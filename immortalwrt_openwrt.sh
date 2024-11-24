@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases | grep -oP '(?<="browser_download_url": ").*?release-\K\d+\.\d+\.\d+' | sort -Vr | head -n 1 || "")
-libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases | grep -oP '(?<="browser_download_url": ").*?release-\d+\.\d+\.\d+_v\K\d+\.\d+\.\d+' | sort -Vr | head -n 1 || "")
-curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'browser_download_url": "\K[^"]*cache[^"]*' >xa
-#curl -sL api.github.com/repos/hong0980/OpenWrt-Cache/releases | grep -oP 'browser_download_url": "\K[^"]*cache[^"]*' >xc
+qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*\K\d+\.\d+\.\d+' | head -n 1)
+libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*\K\d+\.\d+\.\d+' | head -n 2)
+curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >xa
 
-mkdir firmware output 2>/dev/null
 destination_dir="package/A"
 [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
+[[ -d output ]] || mkdir output
+[[ -d firmware ]] || mkdir firmware
 
 color() {
     case $1 in
@@ -308,15 +308,14 @@ sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
 sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$pn1ABFaI\$vt5cmIjlr6M7Z79Eds2lV0:16821:0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
 
 clone_all https://github.com/hong0980/build
-#clone_all https://github.com/sbwml/openwrt_helloworld
-clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
+clone_all https://github.com/fw876/helloworld
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
 clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
 clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static
-clone_dir https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic luci-app-unblockneteasemusic
+git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
 clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm lua-maxminddb \
     luci-app-bypass luci-app-store luci-app-pushbot taskd
 
