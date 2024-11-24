@@ -104,6 +104,12 @@ clone_dir() {
         echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | _printf
         return 0
     }
+
+    [[ $repo_url =~ coolsnowwolf/packages ]] &&  {
+        [[ $REPO_BRANCH =~ 23.05 ]] && set -- "$@" "golang" "bandwidthd"
+        [[ $REPO_BRANCH =~ 21.02 ]] && set -- "$@" "docker" "dockerd" "containerd" "runc" "btrfs-progs" "golang" "bandwidthd"
+    }
+
     for target_dir in "$@"; do
         local source_dir current_dir destination_dir
         source_dir=$(_find "$temp_dir" "$target_dir")
