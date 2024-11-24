@@ -258,10 +258,10 @@ CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '
 curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >cache_url
 
 if [[ $CACHE_URL =~ $TOOLS_HASH ]]; then
-    STEP_NAME='下载toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
+    STEP_NAME='下载toolchain编译工具'; BEGIN_TIME=$(date '+%H:%M:%S')
     wget -qc -t=3 $CACHE_URL
     [ -e *.tzst ]; status
-    STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
+    STEP_NAME='部署toolchain编译工具'; BEGIN_TIME=$(date '+%H:%M:%S')
     tar -I unzstd -xf *.tzst || tar -xf *.tzst
     [ -d staging_dir ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
     status
