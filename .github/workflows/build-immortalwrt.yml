@@ -7,14 +7,14 @@ on:
     inputs:
       branch:
         description: '选择ImmortalWrt仓库的分支：'
-        default: 'openwrt-21.02'
+        default: 'openwrt-23.05'
         required: true
         type: choice
         options: [ openwrt-21.02, openwrt-23.05, master, openwrt-18.06-k5.4, openwrt-18.06 ]
 
       target:
         description: '选择要生成的机型：'
-        default: 'r1-plus-lts'
+        default: 'x86_64'
         required: true
         type: choice
         options: [ x86_64, r1-plus-lts, newifi-d2, asus_rt-n16, phicomm_k2p, armvirt-64-default, r4s, r2s, r2c ]
