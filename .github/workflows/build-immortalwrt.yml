@@ -83,8 +83,8 @@ jobs:
         echo "EMOJI=${Emoji[$rand]}" >>$GITHUB_ENV
 
     - name: jlumbroso 整理空间
-      uses: jlumbroso/free-disk-space@main
       if: env.FREE_DISK == 'free-disk-space' || env.FREE_DISK == 'plus'
+      uses: jlumbroso/free-disk-space@main
       with:
         dotnet: true
         android: true
@@ -138,19 +138,15 @@ jobs:
         prefix: ${{ GITHUB.WORKSPACE }}/${{ env.REPO_FLODER }}
 
     - name: Compile Toolchain
-      if: env.CACHE_ACTIONS == 'true' && !cancelled()
       id: tools
+      if: env.CACHE_ACTIONS == 'true' && !cancelled()
       run: |
         cd $REPO_FLODER
         make -j$(nproc) toolchain/compile || make -j1 V=s toolchain/compile
-
-    - name: 打包 Cache
-      id: fetch_cache
-      if: (env.FETCH_CACHE == 'true' || steps.tools.conclusion == 'success') && !cancelled()
-      run: bash immortalwrt_openwrt.sh
+        bash immortalwrt_openwrt.sh
 
     - name: 上传 Cache 到 Release
-      if: steps.fetch_cache.conclusion == 'success' || env.OUTPUT_RELEASE == 'true' && !cancelled()
+      if: steps.tools.conclusion == 'success' || env.OUTPUT_RELEASE == 'true' && !cancelled()
       uses: softprops/action-gh-release@v2.0.8
       with:
         files: output/*
@@ -162,19 +158,19 @@ jobs:
     - name: 下载软件包
       run: |
         cd $REPO_FLODER
-        make package/download -j$(nproc)
-        #n=0; while true; do make package/download -j && break || (n=$((n+1)); [ $n -eq 3 ] && break); done
+        #make package/download -j$(nproc)
+        n=0; while true; do make package/download -j && break || (n=$((n+1)); [ $n -eq 3 ] && break); done
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
     - name: 固件编译
-      timeout-minutes: 1440
       id: compile
+      timeout-minutes: 1440
       run: cd $REPO_FLODER && make -j$(nproc) || make -j1 V=s
 
     - name: 上传 Bin 到 Artifact
-      uses: actions/upload-artifact@v4.4.0
       if: steps.organize.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true' && !cancelled()
+      uses: actions/upload-artifact@v4.4.0
       with:
         path: ${{ env.REPO_FLODER }}/bin
         name: OpenWrt-${{ env.TARGET_DEVICE }}-bin
@@ -204,15 +200,15 @@ jobs:
         echo "STRDATE=$(TZ=UTC-8 date +%Y-%m-%d)" >>$GITHUB_ENV
 
     - name: 上传 Packages 到 Artifact
-      uses: actions/upload-artifact@v4.4.0
       if: env.upload_packages == 'true' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
+      uses: actions/upload-artifact@v4.4.0
       with:
         path: firmware/*packages.tar.gz
         name: OpenWrt-${{ env.TARGET_DEVICE }}-package
 
     - name: 上传 Firmware 到 Artifact
-      uses: actions/upload-artifact@v4.4.0
       if: env.upload_firmware == 'true' && env.UPLOAD_SYSUPGRADE == 'true' && !cancelled()
+      uses: actions/upload-artifact@v4.4.0
       with:
         path: firmware/*${{ env.FIRMWARE_TYPE }}*
         name: OpenWrt-${{ env.TARGET_DEVICE }}-firmware
