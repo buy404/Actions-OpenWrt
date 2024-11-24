@@ -105,7 +105,7 @@ clone_dir() {
         return 0
     }
 
-    [[ $repo_url =~ coolsnowwolf/packages ]] &&  {
+    [[ $repo_url =~ coolsnowwolf/packages ]] && {
         [[ $REPO_BRANCH =~ 23.05 ]] && set -- "$@" "golang" "bandwidthd"
         [[ $REPO_BRANCH =~ 21.02 ]] && set -- "$@" "docker" "dockerd" "containerd" "runc" "btrfs-progs" "golang" "bandwidthd"
     }
@@ -312,7 +312,7 @@ cat >>.config <<-EOF
 	CONFIG_PACKAGE_default-settings-chn=y
 	CONFIG_DEFAULT_SETTINGS_OPTIMIZE_FOR_CHINESE=y
 	# CONFIG_LUCI_SRCDIET is not set #压缩 Lua 源代码
-	# CONFIG_LUCI_JSMIN is not set  #压缩 JavaScript 源代码
+	# CONFIG_LUCI_JSMIN is not set #压缩 JavaScript 源代码
 	# CONFIG_LUCI_CSSTIDY is not set #压缩 CSS 文件
 EOF
 
