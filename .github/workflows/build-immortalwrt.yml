@@ -239,20 +239,6 @@ jobs:
         tag_name: ${{ env.STRDATE }}-immortalwrt
         name: ${{ env.EMOJI }} ${{ env.STRDATE }} immortalwrt-firmware ${{ env.EMOJI }}
 
-    - name: Save cache state
-      if: env.SAVE_CACHE == 'true' && !cancelled()
-      run: |
-        echo "上传到github"
-        export cache_repo_id='654643315'
-        export cache_path='github.com/repos/hong0980/OpenWrt-Cache/releases'
-        ls output | parallel --wc '
-          while true; do
-            curl -T {} \
-              -H "Content-Type: application/octet-stream" \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              "https://uploads.${cache_path}/${cache_repo_id}/assets?name={}" && break || true
-          done'
-
     - name: Delete Releases
       if: (!cancelled())
       uses: dev-drprasad/delete-older-releases@v0.3.4
