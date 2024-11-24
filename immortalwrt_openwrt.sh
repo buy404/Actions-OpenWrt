@@ -47,7 +47,7 @@ _find() {
 
 _packages() {
     for z in $@; do
-        [[ $z =~ "^#" ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
+        [[ $z =~ ^# ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
     done
 }
 
@@ -415,20 +415,20 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
         done
     }
 
-    xb=$(_find "package/A/ feeds/" "luci-app-bypass")
+    xb=$(_find "package/ feeds/" "luci-app-bypass")
     [[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
     qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
     libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
-    xc=$(_find "package/A/ feeds/" "qBittorrent-static")
+    xc=$(_find "package/ feeds/" "qBittorrent-static")
     [[ -d $xc ]] && {
         sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
     }
-    xd=$(_find "package/A/ feeds/" "luci-app-turboacc")
+    xd=$(_find "package/ feeds/" "luci-app-turboacc")
     [[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
-    xe=$(_find "package/A/ feeds/" "luci-app-ikoolproxy")
+    xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
     [[ -f $xe/luasrc/model/cbi/koolproxy/basic.lua ]] && sed -i \
         '/^local.*sys.exec/ s/$/ or 0/g; /^local.*sys.exec/ s/.txt/.txt 2>\/dev\/null/g' $xe/luasrc/model/cbi/koolproxy/basic.lua
-    xg=$(_find "package/A/ feeds/" "luci-app-pushbot")
+    xg=$(_find "package/ feeds/" "luci-app-pushbot")
     [[ -d $xg ]] && {
         sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
         sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
@@ -526,7 +526,7 @@ case "$TARGET_DEVICE" in
     echo "CONFIG_PERL_NOCOMMENT=y" >>.config
     sed -i -E '/easymesh/d' .config
     sed -i "s/default 160/default $PARTSIZE/" config/Config-images.in
-    sed -i 's/@arm/@TARGET_armvirt_64/g' $(_find "package/A/ feeds/" "luci-app-cpufreq")/Makefile
+    sed -i 's/@arm/@TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile
     ;;
 esac
 
@@ -536,7 +536,7 @@ esac
         dnsmasq nftables libnftnl opkg fullconenat \
         #fstools odhcp6c iptables ipset dropbear usbmode
     clone_dir openwrt-23.05 https://github.com/immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
-        lua-openssl smartdns bluez curl "#miniupnpc" miniupnpd
+        lua-openssl smartdns bluez curl #miniupnpc miniupnpd
     clone_dir openwrt-23.05 https://github.com/immortalwrt/luci luci-app-syncdial luci-app-mwan3
 	cat <<-\EOF >>package/kernel/linux/modules/netfilter.mk
 	define KernelPackage/nft-tproxy
