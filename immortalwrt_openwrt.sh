@@ -106,8 +106,7 @@ clone_dir() {
     }
 
     [[ $repo_url =~ coolsnowwolf/packages ]] && {
-        [[ $REPO_BRANCH =~ 23.05 ]] && set -- "$@" "golang" "bandwidthd"
-        [[ $REPO_BRANCH =~ 21.02 ]] && set -- "$@" "docker" "dockerd" "containerd" "runc" "btrfs-progs" "golang" "bandwidthd"
+        [[ $REPO_BRANCH =~ 21.02 ]] && set -- "$@" "docker" "dockerd" "containerd" "runc" "btrfs-progs" "golang"
     }
 
     for target_dir in "$@"; do
@@ -332,7 +331,7 @@ clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
 clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
-clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static
+clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static bandwidthd
 git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
 clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm \
     luci-app-bypass luci-app-store luci-app-pushbot taskd
