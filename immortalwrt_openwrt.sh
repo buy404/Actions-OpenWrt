@@ -34,10 +34,10 @@ status() {
     [[ $_date =~ [0-9]+ ]] || _date=""
     if [ $CHECK = 0 ]; then
         printf "%-62s %s %s %s %s %s %s %s\n" \
-        `echo -e "$(color cy $STEP_NAME) [ $(color cg ✔) ]${_date}"`
+        $(echo -e "$(color cy $STEP_NAME) [ $(color cg ✔) ]${_date}")
     else
         printf "%-62s %s %s %s %s %s %s %s\n" \
-        `echo -e "$(color cy $STEP_NAME) [ $(color cr ✕) ]${_date}"`
+        $(echo -e "$(color cy $STEP_NAME) [ $(color cr ✕) ]${_date}")
     fi
 }
 
@@ -110,7 +110,9 @@ clone_dir() {
 
     for target_dir in "$@"; do
         local source_dir current_dir destination_dir
-        source_dir=$(_find "$temp_dir" "$target_dir")
+        [[ $target_dir =~ ^# ]] && continue
+        source_dir=$(_find "$temp_dir" "$target_dir") || \
+        source_dir=$(find "$temp_dir" -maxdepth 4 -type d -name "$target_dir" -print -quit)
         [[ -d "$source_dir" ]] || {
             echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
             continue
@@ -277,7 +279,7 @@ status
 config
 
 cat >>.config <<-EOF
-	CONFIG_KERNEL_BUILD_USER="win3gp"
+	CONFIG_KERNEL_BUILD_USER="boy404"
 	CONFIG_KERNEL_BUILD_DOMAIN="OpenWrt"
 	CONFIG_PACKAGE_automount=y
 	CONFIG_PACKAGE_autosamba=y
@@ -322,8 +324,8 @@ sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
 sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
 
 clone_all https://github.com/hong0980/build
-clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_all https://github.com/fw876/helloworld
+clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
@@ -370,7 +372,7 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
     luci-app-control-webrestriction
     luci-app-cowbbonding
     "
-    trv=`awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile`
+    trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
     [[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
     raw.githubusercontent.com/hong0980/diy/master/files/transmission/tr$trv.patch
 
@@ -387,10 +389,9 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
 	))
 	EOF
 
-    clone_all https://github.com/destan19/OpenAppFilter
-    git_clone https://github.com/yaof2/luci-app-ikoolproxy
+    git_clone https://github.com/ilxp/luci-app-ikoolproxy
     git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
-
+    clone_all https://github.com/destan19/OpenAppFilter
     rm -rf feeds/*/*/luci-app-appfilter
 
     mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
@@ -406,13 +407,13 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
         sed -i "s/argonv3/argon/" feeds/luci/applications/luci-app-argon-config/Makefile
         for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
             if grep -q "Kernel Version" $d; then
-                # echo $d
                 sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
                 sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
                 # sed -i '/<%+footer%>/i<fieldset class="cbi-section">\n\t<legend><%:天气%></legend>\n\t<table width="100%" cellspacing="10">\n\t\t<tr><td width="10%"><%:本地天气%></td><td > <iframe width="900" height="120" frameborder="0" scrolling="no" hspace="0" src="//i.tianqi.com/?c=code&a=getcode&id=22&py=xiaoshan&icon=1"></iframe>\n\t\t<tr><td width="10%"><%:柯桥天气%></td><td > <iframe width="900" height="120" frameborder="0" scrolling="no" hspace="0" src="//i.tianqi.com/?c=code&a=getcode&id=22&py=keqiaoqv&icon=1"></iframe>\n\t\t<tr><td width="10%"><%:指数%></td><td > <iframe width="400" height="270" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=27&py=xiaoshan&icon=1"></iframe><iframe width="400" height="270" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=27&py=keqiaoqv&icon=1"></iframe>\n\t</table>\n</fieldset>\n' $d
             fi
         done
     }
+
     xb=$(_find "package/A/ feeds/" "luci-app-bypass")
     [[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
     qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
@@ -530,7 +531,7 @@ esac
 
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
     clone_dir https://github.com/immortalwrt/packages nghttp3 ngtcp2 bash
-    clone_dir openwrt-23.05 https://github.com/immortalwrt/immortalwrt busybox ppp automount openssl \
+    clone_dir openwrt-23.05 https://github.com/immortalwrt/immortalwrt busybox pp2 automount openssl \
         dnsmasq nftables libnftnl opkg fullconenat \
         #fstools odhcp6c iptables ipset dropbear usbmode
     clone_dir openwrt-23.05 https://github.com/immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
