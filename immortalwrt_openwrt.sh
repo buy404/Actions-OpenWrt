@@ -536,7 +536,7 @@ esac
         dnsmasq nftables libnftnl opkg fullconenat \
         #fstools odhcp6c iptables ipset dropbear usbmode
     clone_dir openwrt-23.05 https://github.com/immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
-        lua-openssl smartdns bluez curl #miniupnpc miniupnpd
+        lua-openssl smartdns bluez curl "#miniupnpc" miniupnpd
     clone_dir openwrt-23.05 https://github.com/immortalwrt/luci luci-app-syncdial luci-app-mwan3
 	cat <<-\EOF >>package/kernel/linux/modules/netfilter.mk
 	define KernelPackage/nft-tproxy
