@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-destination_dir="$REPO_FLODER/package/A"
-[[ -d "$destination_dir" ]] || mkdir -p $destination_dir
 [[ -d output ]] || mkdir output
 [[ -d firmware ]] || mkdir firmware
 
@@ -68,7 +66,7 @@ git_clone() {
         repo_url="$2"
         shift 2
     fi
-    local target_dir current_dir
+    local target_dir current_dir destination_dir
     if [[ -n "$@" ]]; then
         target_dir="$@"
     else
@@ -84,6 +82,8 @@ git_clone() {
         mv -f $target_dir ${current_dir%/*}
         echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
     else
+        destination_dir="package/A"
+        [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
         mv -f $target_dir $destination_dir
         echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
     fi
@@ -105,7 +105,7 @@ clone_dir() {
         return 0
     }
     for target_dir in "$@"; do
-        local source_dir current_dir
+        local source_dir current_dir destination_dir
         source_dir=$(_find "$temp_dir" "$target_dir")
         [[ -d "$source_dir" ]] || {
             echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
@@ -116,6 +116,8 @@ clone_dir() {
             mv -f $source_dir ${current_dir%/*}
             echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
         else
+            destination_dir="package/A"
+            [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
             echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
         fi
@@ -139,13 +141,15 @@ clone_all() {
         return 0
     }
     for target_dir in $(ls -l $temp_dir/$@ | awk '/^d/{print $NF}'); do
-        local source_dir current_dir
+        local source_dir current_dir destination_dir
         source_dir=$(_find "$temp_dir" "$target_dir")
         current_dir=$(_find "package/ feeds/ target/" "$target_dir")
         if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
             echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
         else
+            destination_dir="package/A"
+            [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
             echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
         fi
