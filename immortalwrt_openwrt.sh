@@ -113,7 +113,7 @@ clone_dir() {
         [[ $target_dir =~ ^# ]] && continue
         source_dir=$(_find "$temp_dir" "$target_dir")
         [[ -d "$source_dir" ]] || \
-        source_dir=$(find "$temp_dir" -maxdepth 4 -type d -name "$target_dir" -print -quit) || \
+        source_dir=$(find "$temp_dir" -maxdepth 4 -type d -name "$target_dir" -print -quit)
         [[ -d "$source_dir" ]] || {
             echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
             continue
