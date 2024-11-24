@@ -1,9 +1,25 @@
 #!/usr/bin/env bash
 
-destination_dir="package/A"
+destination_dir="$REPO_FLODER/package/A"
 [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
 [[ -d output ]] || mkdir output
 [[ -d firmware ]] || mkdir firmware
+
+if [[ $CACHE_ACTIONS = 'true' ]]; then
+    echo "打包cache"
+    cd $REPO_FLODER
+    [[ -d ".ccache" ]] && (ccache=".ccache"; ls -alh .ccache)
+    du -h --max-depth=1 ./staging_dir
+    du -h --max-depth=1 ./ --exclude=staging_dir
+    tar -I zstdmt -cf $GITHUB_WORKSPACE/output/$CACHE_NAME.tzst staging_dir/host* staging_dir/tool* $ccache || \
+    tar --zstd -cf $GITHUB_WORKSPACE/output/$CACHE_NAME.tar.zst staging_dir/host* staging_dir/tool* $ccache
+    if [[ $(du -sm "$GITHUB_WORKSPACE/output" | cut -f1) -ge 150 ]]; then
+        ls -lh $GITHUB_WORKSPACE/output
+        echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV
+        sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
+    fi
+    exit 0
+fi
 
 color() {
     case $1 in
@@ -364,7 +380,7 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
 	))
 	EOF
 
-    git_clone https://github.com/destan19/OpenAppFilter
+    clone_all https://github.com/destan19/OpenAppFilter
     git_clone https://github.com/yaof2/luci-app-ikoolproxy
     git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
 
