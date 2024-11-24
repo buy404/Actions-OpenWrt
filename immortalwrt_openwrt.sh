@@ -43,7 +43,11 @@ status() {
 }
 
 _find() {
-    find $1 -maxdepth 5 -type d -name "$2" -print -quit 2>/dev/null
+    find $1 -maxdepth 3 -type d -name "$2" -print -quit 2>/dev/null
+}
+
+_find2() {
+    find $1 -maxdepth 4 -type d -name "$2" -print -quit 2>/dev/null
 }
 
 _packages() {
@@ -106,7 +110,7 @@ clone_dir() {
     }
     for target_dir in "$@"; do
         local source_dir current_dir destination_dir
-        source_dir=$(_find "$temp_dir" "$target_dir")
+        source_dir=$(_find2 "$temp_dir" "$target_dir")
         [[ -d "$source_dir" ]] || {
             echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
             continue
@@ -328,7 +332,7 @@ clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
 clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
 clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static
 git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
-clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm lua-maxminddb \
+clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm \
     luci-app-bypass luci-app-store luci-app-pushbot taskd
 
 [[ "$TARGET_DEVICE" =~ phicomm|newifi|asus ]] || {
@@ -531,7 +535,7 @@ esac
     # sed -i "s|VERSION.*|VERSION-5.4 = .273|; s|HASH.*|HASH-5.4.273 = 8ba0cfd3faa7222542b30791def49f426d7b50a07217366ead655a5687534743|" include/kernel-5.4
     clone_dir https://github.com/immortalwrt/packages nghttp3 ngtcp2 bash
     clone_dir openwrt-23.05 https://github.com/immortalwrt/immortalwrt busybox ppp automount openssl \
-        dnsmasq nftables libnftnl sonfilter opkg fullconenat \
+        dnsmasq nftables libnftnl opkg fullconenat \
         #fstools odhcp6c iptables ipset dropbear usbmode
     clone_dir openwrt-23.05 https://github.com/immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
         lua-openssl smartdns bluez curl #miniupnpc miniupnpd
