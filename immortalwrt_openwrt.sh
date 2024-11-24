@@ -4,15 +4,15 @@
 [[ -d firmware ]] || mkdir firmware
 
 if [[ $CACHE_ACTIONS = 'true' ]]; then
-    echo "打包cache"
+    echo "打包toolchain"
     cd $REPO_FLODER
     [[ -d ".ccache" ]] && (ccache=".ccache"; ls -alh .ccache)
     du -h --max-depth=1 ./staging_dir
     du -h --max-depth=1 ./ --exclude=staging_dir
-    tar -I zstdmt -cf $GITHUB_WORKSPACE/output/$CACHE_NAME.tzst staging_dir/host* staging_dir/tool* $ccache || \
-    tar --zstd -cf $GITHUB_WORKSPACE/output/$CACHE_NAME.tar.zst staging_dir/host* staging_dir/tool* $ccache
-    if [[ $(du -sm "$GITHUB_WORKSPACE/output" | cut -f1) -ge 150 ]]; then
-        ls -lh $GITHUB_WORKSPACE/output
+    tar -I zstdmt -cf ../output/$CACHE_NAME.tzst staging_dir/host* staging_dir/tool* $ccache || \
+    tar --zstd -cf ../output/$CACHE_NAME.tar.zst staging_dir/host* staging_dir/tool* $ccache
+    if [[ $(du -sm "../output" | cut -f1) -ge 150 ]]; then
+        ls -lh ../output
         echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV
         sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
     fi
@@ -43,7 +43,7 @@ status() {
 }
 
 _find() {
-    find $1 -maxdepth 3 -type d -name "$2" -print -quit 2>/dev/null
+    find $1 -maxdepth 5 -type d -name "$2" -print -quit 2>/dev/null
 }
 
 _packages() {
@@ -251,11 +251,12 @@ TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
 CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
-curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >xa
-if (grep -q "$CACHE_NAME" xa); then
+curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >cache_url
+
+if (grep -q "$CACHE_NAME" cache_url); then
     STEP_NAME='下载toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
-    wget -qc -t=3 $(grep "$CACHE_NAME" xa)
-    status
+    wget -qc -t=3 $(grep "$CACHE_NAME" cache_url)
+    [ -e *.tzst ]; status
     [ -e *.tzst ] && {
         STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
         tar -I unzstd -xf *.tzst || tar -xf *.tzst
@@ -309,14 +310,14 @@ cat >>.config <<-EOF
 	# CONFIG_LUCI_CSSTIDY is not set #压缩 CSS 文件
 EOF
 
-config_generate="package/base-files/files/bin/config_generate"
 color cy "加载自定义设置"
+config_generate="package/base-files/files/bin/config_generate"
 wget -qO package/base-files/files/etc/banner git.io/JoNK8
 sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_NAME-$(TZ=UTC-8 date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
 sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
 sed -i "s/ImmortalWrt/OpenWrt/g" {$config_generate,include/version.mk}
 sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
-sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$pn1ABFaI\$vt5cmIjlr6M7Z79Eds2lV0:16821:0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
+sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
 
 clone_all https://github.com/hong0980/build
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
