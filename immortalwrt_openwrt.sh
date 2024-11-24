@@ -262,12 +262,10 @@ if [[ $CACHE_URL =~ $TOOLS_HASH ]]; then
     STEP_NAME='下载toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
     wget -qc -t=3 $CACHE_URL
     [ -e *.tzst ]; status
-    [ -e *.tzst ] && {
-        STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
-        tar -I unzstd -xf *.tzst || tar -xf *.tzst
-        [ -d staging_dir ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
-        status
-    }
+    STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
+    tar -I unzstd -xf *.tzst || tar -xf *.tzst
+    [ -d staging_dir ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
+    status
 else
     echo "CACHE_ACTIONS=true" >>$GITHUB_ENV
 fi
