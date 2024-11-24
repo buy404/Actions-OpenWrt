@@ -239,10 +239,6 @@ if (grep -q "$CACHE_NAME" ../xa); then
     [ -e *.tzst ] && {
         STEP_NAME='部署toolchain-cache'; BEGIN_TIME=$(date '+%H:%M:%S')
         (tar -I unzstd -xf *.tzst || tar -xf *.tzst) && {
-            if ! grep -q "$CACHE_NAME.tzst" ../xa; then
-                cp *.tzst ../output
-                echo "OUTPUT_RELEASE=true" >> $GITHUB_ENV
-            fi
             sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
         }
         [ -d staging_dir ]; status
