@@ -599,10 +599,6 @@ sed -i \
     -e "s/\(\(^\| \|    \)\(PKG_HASH\|PKG_MD5SUM\|PKG_MIRROR_HASH\|HASH\):=\).*/\1skip/" \
 package/A/*/Makefile 2>/dev/null
 
-#for p in package/A/luci-*/po feeds/luci/applications/luci-*/po; do
-#    [[ -L $p/zh_Hans || -L $p/zh-cn ]] || (ln -s zh-cn $p/zh_Hans 2>/dev/null || ln -s zh_Hans $p/zh-cn 2>/dev/null)
-#done
-
 for e in $(ls -d package/A/luci-*/po feeds/luci/applications/luci-*/po); do
     if [[ -d $e/zh-cn && ! -d $e/zh_Hans ]]; then
         ln -s zh-cn $e/zh_Hans 2>/dev/null
