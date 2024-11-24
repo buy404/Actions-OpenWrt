@@ -258,9 +258,9 @@ CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
 
-if [ -n $CACHE_URL ]; then
+if [ $CACHE_URL =~ $TOOLS_HASH ]; then
     STEP_NAME='下载toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
-    wget -qc -t=3 ${CACHE_URL}
+    wget -qc -t=3 $CACHE_URL
     [ -e *.tzst ]; status
     [ -e *.tzst ] && {
         STEP_NAME='部署toolchain'; BEGIN_TIME=$(date '+%H:%M:%S')
