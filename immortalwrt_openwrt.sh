@@ -46,10 +46,6 @@ _find() {
     find $1 -maxdepth 3 -type d -name "$2" -print -quit 2>/dev/null
 }
 
-_find2() {
-    find $1 -maxdepth 4 -type d -name "$2" -print -quit 2>/dev/null
-}
-
 _packages() {
     for z in $@; do
         [[ $z =~ ^# ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
@@ -110,7 +106,7 @@ clone_dir() {
     }
     for target_dir in "$@"; do
         local source_dir current_dir destination_dir
-        source_dir=$(_find2 "$temp_dir" "$target_dir")
+        source_dir=$(_find "$temp_dir" "$target_dir")
         [[ -d "$source_dir" ]] || {
             echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
             continue
@@ -604,7 +600,7 @@ done
 [[ "$REPO_BRANCH" =~ master ]] && sed -i '/deluge/d' .config
 sed -i '/bridge\|vssr\|deluge/d' .config
 
-STEP_NAME='更新配置'; BEGIN_TIME=$(date '+%H:%M:%S')
+STEP_NAME='更新配置文件'; BEGIN_TIME=$(date '+%H:%M:%S')
 make defconfig 1>/dev/null 2>&1
 status
 
