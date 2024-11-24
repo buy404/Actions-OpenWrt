@@ -34,7 +34,7 @@ on:
         description: '整理空间'
         type: choice
         default: 'false'
-        options: [losetup, free-disk-space, plus]
+        options: [losetup, free-disk-space, plus, no]
         required: false
 
 env:
