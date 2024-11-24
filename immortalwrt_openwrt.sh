@@ -9,8 +9,7 @@ if [[ $CACHE_ACTIONS = 'true' ]]; then
     [[ -d ".ccache" ]] && (ccache=".ccache"; ls -alh .ccache)
     du -h --max-depth=1 ./staging_dir
     du -h --max-depth=1 ./ --exclude=staging_dir
-    tar -I zstdmt -cf ../output/$CACHE_NAME.tzst staging_dir/host* staging_dir/tool* $ccache || \
-    tar --zstd -cf ../output/$CACHE_NAME.tar.zst staging_dir/host* staging_dir/tool* $ccache
+    tar -I zstdmt -cf ../output/$CACHE_NAME.tzst staging_dir/host* staging_dir/tool* $ccache
     if [[ $(du -sm "../output" | cut -f1) -ge 150 ]]; then
         ls -lh ../output
         echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV
