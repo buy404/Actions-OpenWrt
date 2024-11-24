@@ -237,7 +237,7 @@ config (){
 
 REPO_URL="https://github.com/immortalwrt/immortalwrt"
 STEP_NAME='拉取编译源码'; BEGIN_TIME=$(date '+%H:%M:%S')
-[ "$REPO_BRANCH" -a "$REPO_BRANCH" != "master" ] && BRANCH="-b $REPO_BRANCH --single-branch"
+[[ $REPO_BRANCH != "master" ]] && BRANCH="-b $REPO_BRANCH --single-branch"
 git clone -q $BRANCH $REPO_URL $REPO_FLODER
 status
 [[ -d $REPO_FLODER ]] && cd $REPO_FLODER || exit
@@ -257,14 +257,14 @@ echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
 CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
 curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >cache_url
 
-if [[ $CACHE_URL =~ $TOOLS_HASH ]]; then
+if (grep -q "$CACHE_NAME" cache_url); then
     STEP_NAME='下载toolchain编译工具'; BEGIN_TIME=$(date '+%H:%M:%S')
-    wget -qc -t=3 $CACHE_URL
+    wget -qc -t=3 $(grep "$CACHE_NAME" cache_url)
     [ -e *.tzst ]; status
     STEP_NAME='部署toolchain编译工具'; BEGIN_TIME=$(date '+%H:%M:%S')
     tar -I unzstd -xf *.tzst || tar -xf *.tzst
     [ -d staging_dir ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
-    status
+    status; rm cache_url
 else
     echo "CACHE_ACTIONS=true" >>$GITHUB_ENV
 fi
