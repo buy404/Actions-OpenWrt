@@ -140,9 +140,9 @@ jobs:
     - name: 部署
       run: bash immortalwrt_openwrt.sh
 
-    - name: Cache
-      uses: stupidloud/cachewrtbuild@main
+    - name: Cache Toolchain
       if: env.CACHE_ACTIONS == 'true'
+      uses: HiGarfield/cachewrtbuild@main
       with:
         ccache: true
         clean: ${{ env.CLEAN }}
