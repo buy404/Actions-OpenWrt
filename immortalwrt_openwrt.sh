@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*\K\d+\.\d+\.\d+' | head -n 1)
-libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*\K\d+\.\d+\.\d+' | head -n 2)
-curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >xa
-
 destination_dir="package/A"
 [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
 [[ -d output ]] || mkdir output
@@ -234,7 +230,8 @@ SOURCE_NAME=$(basename $(dirname $REPO_URL))
 TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
 CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$NAME-cache-$TOOLS_HASH"
 echo "CACHE_NAME=$CACHE_NAME" >>$GITHUB_ENV
-
+CACHE_URL=$(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | awk -F '"' '/download_url/{print $4}' | grep $CACHE_NAME)
+curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep -oP 'download_url": "\K[^"]*cache[^"]*' >xa
 if (grep -q "$CACHE_NAME" ../xa); then
     STEP_NAME='下载toolchain-cache'; BEGIN_TIME=$(date '+%H:%M:%S')
     wget -qc -t=3 $(grep "$CACHE_NAME" ../xa)
@@ -372,7 +369,7 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
 	))
 	EOF
 
-    clone_all https://github.com/destan19/OpenAppFilter
+    git_clone https://github.com/destan19/OpenAppFilter
     git_clone https://github.com/yaof2/luci-app-ikoolproxy
     git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
 
@@ -398,22 +395,20 @@ clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm
             fi
         done
     }
-    # xa=$(_find "package/A/ feeds/luci/applications/" "luci-app-vssr")
-    # [[ -d $xa ]] && sed -i "/dports/s/1/2/;/ip_data_url/s|'.*'|'https://ispip.clang.cn/all_cn.txt'|" $xa/root/etc/config/vssr
-    xb=$(_find "package/A/ feeds/luci/applications/" "luci-app-bypass")
+    xb=$(_find "package/A/ feeds/" "luci-app-bypass")
     [[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
-    #https://github.com/userdocs/qbittorrent-nox-static/releases
+    qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
+    libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
     xc=$(_find "package/A/ feeds/" "qBittorrent-static")
     [[ -d $xc ]] && {
-        # [[ $qBittorrent_version ]] && sed -i "s/userdocs/hong0980/" $xc/Makefile
         sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
     }
-    xd=$(_find "package/A/ feeds/luci/applications/" "luci-app-turboacc")
+    xd=$(_find "package/A/ feeds/" "luci-app-turboacc")
     [[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
-    xe=$(_find "package/A/ feeds/luci/applications/" "luci-app-ikoolproxy")
+    xe=$(_find "package/A/ feeds/" "luci-app-ikoolproxy")
     [[ -f $xe/luasrc/model/cbi/koolproxy/basic.lua ]] && sed -i \
         '/^local.*sys.exec/ s/$/ or 0/g; /^local.*sys.exec/ s/.txt/.txt 2>\/dev\/null/g' $xe/luasrc/model/cbi/koolproxy/basic.lua
-    xg=$(_find "package/A/ feeds/luci/applications/" "luci-app-pushbot")
+    xg=$(_find "package/A/ feeds/" "luci-app-pushbot")
     [[ -d $xg ]] && {
         sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
         sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
