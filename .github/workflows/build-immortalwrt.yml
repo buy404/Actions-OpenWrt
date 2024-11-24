@@ -159,7 +159,7 @@ jobs:
     - name: 保存 Cache
       id: fetch_cache
       if: (env.FETCH_CACHE == 'true' || steps.tools.conclusion == 'success') && !cancelled()
-      run: bash lean_openwrt.sh
+      run: bash immortalwrt_openwrt.sh
 
     - name: Cache 上传到 Release
       if: steps.fetch_cache.conclusion == 'success' || env.OUTPUT_RELEASE == 'true' && !cancelled()
