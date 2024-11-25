@@ -105,7 +105,7 @@ clone_dir() {
     }
 
     [[ $repo_url =~ coolsnowwolf/packages ]] && {
-        [[ $REPO_BRANCH =~ 21.02 ]] && set -- "$@" "docker" "dockerd" "containerd" "runc" "btrfs-progs" "golang"
+        [[ $REPO_BRANCH =~ 21.02 ]] && set -- "$@" "docker" "dockerd" "containerd" "runc" "btrfs-progs"
     }
 
     for target_dir in "$@"; do
@@ -335,6 +335,22 @@ clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qB
 git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
 clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm \
     luci-app-bypass luci-app-store luci-app-pushbot taskd
+
+[[ ! "$REPO_BRANCH" =~ 18.06 ]] && {
+    git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
+    clone_all https://github.com/morytyann/OpenWrt-mihomo
+    clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
+    clone_all https://github.com/brvphoenix/wrtbwmon
+    clone_all https://github.com/sbwml/luci-app-mosdns
+    clone_all https://github.com/sbwml/luci-app-alist
+}
+
+[[ "$REPO_BRANCH" =~ 18.06 ]] && {
+    clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
+    clone_all lua https://github.com/sbwml/luci-app-alist
+}
+
+git_clone https://github.com/sbwml/packages_lang_golang golang
 
 [[ "$TARGET_DEVICE" =~ phicomm|newifi|asus ]] || {
     _packages "
@@ -611,14 +627,12 @@ make defconfig 1>/dev/null 2>&1
 status
 
 LINUX_VERSION=$(grep 'CONFIG_LINUX.*=y' .config | sed -r 's/CONFIG_LINUX_(.*)=y/\1/' | tr '_' '.')
-echo -e "$(color cy 当前机型) $(color cb $SOURCE_NAME-${REPO_BRANCH#*-}-$LINUX_VERSION-${DEVICE_NAME}${VERSION:+-$VERSION})"
+echo -e "$(color cy 当前编译机型) $(color cb $SOURCE_NAME-${REPO_BRANCH#*-}-$LINUX_VERSION-${DEVICE_NAME}${VERSION:+-$VERSION})"
 sed -i "/IMG_PREFIX:/ {s/=/=$SOURCE_NAME-${REPO_BRANCH#*-}-$LINUX_VERSION-\$(shell TZ=UTC-8 date +%m%d-%H%M)-/}" include/image.mk
 
-echo "UPLOAD_BIN_DIR=false" >>$GITHUB_ENV
-echo "UPLOAD_COWTRANSFER=false" >>$GITHUB_ENV
-echo "UPLOAD_WETRANSFER=false" >>$GITHUB_ENV
+echo "CACHE=false" >>$GITHUB_ENV
 echo "CLEAN=false" >>$GITHUB_ENV
+echo "UPLOAD_BIN_DIR=false" >>$GITHUB_ENV
 echo "FIRMWARE_TYPE=$FIRMWARE_TYPE" >>$GITHUB_ENV
-echo "VERSION=$VERSION" >>$GITHUB_ENV
 
 echo -e "\e[1;35m脚本运行完成！\e[0m"
