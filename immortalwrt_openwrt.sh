@@ -699,8 +699,8 @@ KERNEL=$(grep -oP 'KERNEL_PATCHVER:=\K[^ ]+' target/linux/$DEVICE_TARGET/Makefil
 KERNEL_VERSION=$(awk -F '-' '/KERNEL/{print $2}' include/kernel-$KERNEL | awk '{print $1}')
 #echo "KERNEL_VERSION=$KERNEL_VERSION" >> $GITHUB_ENV
 
-echo -e "$(color cy 当前编译机型) $(color cb $SOURCE_NAME-${REPO_BRANCH#*-}-$KERNEL_VERSION-${DEVICE_NAME}${VERSION:+-$VERSION})"
-sed -i "/IMG_PREFIX:/ {s/\$(VERSION_DIST_SANITIZED)/$SOURCE_NAME-${REPO_BRANCH#*-}-$KERNEL_VERSION-\$(date +%y.%m.%d)/}" include/image.mk
+echo -e "$(color cy 当前编译机型) $(color cb $SOURCE_NAME-${REPO_BRANCH#*-}-$DEVICE_NAME-$KERNEL_VERSION)"
+sed -i "/IMG_PREFIX:/ {s/=/=$SOURCE_NAME-${REPO_BRANCH#*-}-$KERNEL_VERSION-\$(date +%y.%m.%d)-/}" include/image.mk
 
 echo "CACHE=false" >>$GITHUB_ENV
 echo "CLEAN=false" >>$GITHUB_ENV
