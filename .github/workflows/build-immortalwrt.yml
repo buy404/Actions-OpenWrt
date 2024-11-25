@@ -163,7 +163,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译 ${{ env.TARGET_DEVICE }} 固件
+    - name: 编译 [ ${{ env.TARGET_DEVICE }} ] 固件
       id: compile
       timeout-minutes: 1440
       run: cd $REPO_FLODER && make -j$(nproc) || make -j1 V=s
