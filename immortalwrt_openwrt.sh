@@ -180,8 +180,8 @@ config (){
 			# CONFIG_GRUB_EFI_IMAGES is not set
 			# CONFIG_VMDK_IMAGES is not set
 			EOF
-            KERNEL_TARGET=amd64
-            echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
+			KERNEL_TARGET=amd64
+			echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
 			;;
 		"r1-plus-lts"|"r1-plus"|"r4s"|"r2c"|"r2s")
 			cat >.config<<-EOF
@@ -200,8 +200,8 @@ config (){
 			"r4s"|"r2c"|"r2s")
 			echo "CONFIG_TARGET_rockchip_armv8_DEVICE_friendlyarm_nanopi-$TARGET_DEVICE=y" >>.config ;;
 			esac
-            KERNEL_TARGET=arm64
-            echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
+			KERNEL_TARGET=arm64
+			echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
 			;;
 		"newifi-d2")
 			cat >.config<<-EOF
@@ -238,8 +238,8 @@ config (){
 			CONFIG_TARGET_armvirt_64=y
 			CONFIG_TARGET_armvirt_64_Default=y
 			EOF
-            KERNEL_TARGET=arm64
-            echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
+			KERNEL_TARGET=arm64
+			echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
 			;;
 	esac
 }
@@ -650,16 +650,16 @@ git clone -q https://github.com/zsh-users/zsh-autosuggestions files/root/.oh-my-
 git clone -q https://github.com/zsh-users/zsh-syntax-highlighting files/root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git clone -q https://github.com/zsh-users/zsh-completions files/root/.oh-my-zsh/custom/plugins/zsh-completions
 cat >files/root/.zshrc<<-EOF
-    # Path to your oh-my-zsh installation.
-    ZSH=$HOME/.oh-my-zsh
-    # Set name of the theme to load.
-    ZSH_THEME="ys"
-    # Uncomment the following line to disable bi-weekly auto-update checks.
-    DISABLE_AUTO_UPDATE="true"
-    # Which plugins would you like to load?
-    plugins=(git command-not-found extract z docker zsh-syntax-highlighting zsh-autosuggestions zsh-completions)
-    source $ZSH/oh-my-zsh.sh
-    autoload -U compinit && compinit
+	# Path to your oh-my-zsh installation.
+	ZSH=$HOME/.oh-my-zsh
+	# Set name of the theme to load.
+	ZSH_THEME="ys"
+	# Uncomment the following line to disable bi-weekly auto-update checks.
+	DISABLE_AUTO_UPDATE="true"
+	# Which plugins would you like to load?
+	plugins=(git command-not-found extract z docker zsh-syntax-highlighting zsh-autosuggestions zsh-completions)
+	source $ZSH/oh-my-zsh.sh
+	autoload -U compinit && compinit
 EOF
 status
 
