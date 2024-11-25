@@ -163,7 +163,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译固件
+    - name: 编译 ${{ env.TARGET_DEVICE }} 固件
       id: compile
       timeout-minutes: 1440
       run: cd $REPO_FLODER && make -j$(nproc) || make -j1 V=s
@@ -175,7 +175,7 @@ jobs:
         path: ${{ env.REPO_FLODER }}/bin
         name: OpenWrt-${{ env.TARGET_DEVICE }}-bin
 
-    - name: 筛选固件
+    - name: 整理 & 筛选固件
       id: organize
       if: steps.compile.conclusion == 'success' && !cancelled()
       run: |
