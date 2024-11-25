@@ -622,6 +622,43 @@ done
 [[ "$REPO_BRANCH" =~ master ]] && sed -i '/deluge/d' .config
 sed -i '/bridge\|vssr\|deluge/d' .config
 
+STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
+[[ -d files/etc/openclash/core ]] || mkdir -p files/etc/openclash/core
+CLASH_META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-${1}.tar.gz"
+GEOIP_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
+GEOSITE_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
+COUNTRY_URL="https://raw.githubusercontent.com/alecthw/mmdb_china_ip_list/release/Country.mmdb"
+wget -qO- $CLASH_META_URL | tar xOvz > files/etc/openclash/core/clash_meta
+wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
+wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
+wget -qO- $COUNTRY_URL > files/etc/openclash/Country.mmdb
+chmod +x files/etc/openclash/core/clash_meta
+status
+
+STEP_NAME='下载zsh终端工具'; BEGIN_TIME=$(date '+%H:%M:%S')
+[[ -d files/root ]] || mkdir -p files/root
+git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh ./.oh-my-zsh
+git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions files/root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting files/root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+git clone --depth=1 https://github.com/zsh-users/zsh-completions files/root/.oh-my-zsh/custom/plugins/zsh-completions
+cat >files/root/.zshrc<<-EOF
+    export ZSH=$HOME/.oh-my-zsh
+    ZSH_THEME="ys"
+    DISABLE_AUTO_UPDATE="true"
+    plugins=(git command-not-found extract z docker zsh-syntax-highlighting zsh-autosuggestions zsh-completions)
+    source $ZSH/oh-my-zsh.sh
+    autoload -U compinit && compinit
+    EOF
+status
+cat files/root/.zshrc
+
+STEP_NAME='下载adguardhome运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
+[[ -d files/usr/bin/AdGuardHome ]] || mkdir -p files/usr/bin/AdGuardHome
+AGH_CORE="https://github.com/AdguardTeam/AdGuardHome/releases/latest/download/AdGuardHome_linux_${1}.tar.gz"
+wget -qO- $AGH_CORE | tar xOvz > files/usr/bin/AdGuardHome/AdGuardHome
+chmod +x files/usr/bin/AdGuardHome/AdGuardHome
+status
+
 STEP_NAME='更新配置文件'; BEGIN_TIME=$(date '+%H:%M:%S')
 make defconfig 1>/dev/null 2>&1
 status
