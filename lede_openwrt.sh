@@ -468,7 +468,7 @@ case $TARGET_DEVICE in
     # sed -i 's/-Enhanced-Edition//' feeds/luci/applications/luci-app-qbittorrent/Makefile
     sed -i 's/arm/arm||TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile
     sed -i "s/default 160/default $PARTSIZE/" config/Config-images.in
-    sed -e 's/services/system/; s/00//' $(_find "package/ feeds/" "luci-app-cpufreq")/luasrc/controller/cpufreq.lua -i
+    sed -i 's/services/system/; s/00//' $(_find "package/ feeds/" "luci-app-cpufreq")/luasrc/controller/cpufreq.lua
     [ -d ../opt/openwrt_packit ] && {
         sed -i '{
         s|mv |mv -v |
@@ -549,7 +549,7 @@ $(eval $(call Py3BasePackage,python3-uuid, \
 ))
 EOF
 
-sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' package/A/luci-app-pass*/Makefile
+sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' $(find package/ feeds/ -type d -name luci-app-pass* -print)/Makefile
 sed -i '/bridged/d; /deluge/d; /transmission/d' .config
 
 sed -i \
