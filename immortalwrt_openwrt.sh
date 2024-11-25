@@ -339,7 +339,7 @@ rm -rf feeds/*/*/luci-app-appfilter
     clone_dir openwrt-23.05 https://github.com/immortalwrt/luci luci-app-syncdial luci-app-mwan3
 }
 
-STEP_NAME='加载自定义设置'; BEGIN_TIME=$(date '+%H:%M:%S')
+STEP_NAME='加载个人设置'; BEGIN_TIME=$(date '+%H:%M:%S')
 
 config
 
