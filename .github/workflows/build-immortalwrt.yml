@@ -175,7 +175,7 @@ jobs:
         path: ${{ env.REPO_FLODER }}/bin
         name: OpenWrt-${{ env.TARGET_DEVICE }}-bin
 
-    - name: 整理并筛选固件
+    - name: 整理筛选固件
       id: organize
       if: steps.compile.conclusion == 'success' && !cancelled()
       run: |
