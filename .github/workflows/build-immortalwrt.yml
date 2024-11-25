@@ -108,7 +108,7 @@ jobs:
         sudo mount -o compress=zstd $LV_NAME $GITHUB_WORKSPACE
         sudo chown -R runner:runner $GITHUB_WORKSPACE && df -hT
 
-    - name: Checkout Repository
+    - name: Checkout Repo
       uses: actions/checkout@v4.2.0
 
     - name: Initialization Environment
@@ -155,7 +155,7 @@ jobs:
         tag_name: immortalwrt-Cache
         name: ${{ env.EMOJI }} immortalwrt-Cache ${{ env.EMOJI }}
 
-    - name: Download DL Package
+    - name: Download Package
       run: |
         cd $REPO_FLODER
         #make package/download -j$(nproc)
