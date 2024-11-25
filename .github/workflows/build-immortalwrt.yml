@@ -183,8 +183,8 @@ jobs:
       if: steps.organize.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true' && !cancelled()
       uses: actions/upload-artifact@v4.4.0
       with:
-        path: ${{ env.REPO_FLODER }}/bin
         name: OpenWrt-${{ env.TARGET_DEVICE }}-bin
+        path: ${{ env.REPO_FLODER }}/bin
 
     - name: Organize Files
       id: organize
@@ -201,25 +201,20 @@ jobs:
         sf=${CACHE_NAME%%-*}-${REPO_BRANCH#*-}-$(date +%y.%m.%d)
         ARCH=$(awk -F '"' '/ARCH_PACKAGES/{print $2}' .config)
         [ $FIRMWARE_TYPE ] && cp -v $(find bin/targets/ -type f -name "*${FIRMWARE_TYPE}*") ../firmware && echo "UPLOAD_FIRMWARE=true" >>$GITHUB_ENV || true
-        tar -zcPf ../firmware/$sf-$ARCH-packages.tar.gz bin/packages/ && echo "UPLOAD_PACKAGES=true" >>$GITHUB_ENV || true
+        tar -zcPf ../firmware/$sf-$ARCH-packages.tar.gz bin/packages/
         cd ../firmware && md5sum * >$sf-$TARGET_DEVICE-md5-config.txt || true
         sed '/^$/d' ../$REPO_FLODER/.config >>$sf-$TARGET_DEVICE-md5-config.txt || true
         echo "FIRMWARE=$PWD" >>$GITHUB_ENV
         echo "STRDATE=$(date +%Y-%m-%d)" >>$GITHUB_ENV
 
-    - name: Upload Packages To Artifact
-      if: env.UPLOAD_PACKAGES == 'true' && !cancelled()
-      uses: actions/upload-artifact@v4.4.0
-      with:
-        path: firmware/*packages.tar.gz
-        name: OpenWrt-${{ env.TARGET_DEVICE }}-package
-
     - name: Upload Firmware To Artifact
       if: env.UPLOAD_FIRMWARE == 'true' && env.UPLOAD_ARTIFACT == 'true' && !cancelled()
       uses: actions/upload-artifact@v4.4.0
       with:
-        path: firmware/*${{ env.FIRMWARE_TYPE }}*
         name: OpenWrt-${{ env.TARGET_DEVICE }}-firmware
+        path: |
+          firmware/*packages.tar.gz
+          firmware/*${{ env.FIRMWARE_TYPE }}*
 
     - name: Upload Firmware To Release
       if: env.UPLOAD_FIRMWARE == 'true' && env.UPLOAD_RELEASE == 'true' && !cancelled()
