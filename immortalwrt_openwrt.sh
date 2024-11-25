@@ -180,6 +180,8 @@ config (){
 			# CONFIG_GRUB_EFI_IMAGES is not set
 			# CONFIG_VMDK_IMAGES is not set
 			EOF
+            KERNEL_TARGET=amd64
+            echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
 			;;
 		"r1-plus-lts"|"r1-plus"|"r4s"|"r2c"|"r2s")
 			cat >.config<<-EOF
@@ -198,6 +200,8 @@ config (){
 			"r4s"|"r2c"|"r2s")
 			echo "CONFIG_TARGET_rockchip_armv8_DEVICE_friendlyarm_nanopi-$TARGET_DEVICE=y" >>.config ;;
 			esac
+            KERNEL_TARGET=arm64
+            echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
 			;;
 		"newifi-d2")
 			cat >.config<<-EOF
@@ -622,42 +626,49 @@ done
 [[ "$REPO_BRANCH" =~ master ]] && sed -i '/deluge/d' .config
 sed -i '/bridge\|vssr\|deluge/d' .config
 
-STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
-[[ -d files/etc/openclash/core ]] || mkdir -p files/etc/openclash/core
-CLASH_META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-${1}.tar.gz"
-GEOIP_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
-GEOSITE_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
-COUNTRY_URL="https://raw.githubusercontent.com/alecthw/mmdb_china_ip_list/release/Country.mmdb"
-wget -qO- $CLASH_META_URL | tar xOvz > files/etc/openclash/core/clash_meta
-wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
-wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
-wget -qO- $COUNTRY_URL > files/etc/openclash/Country.mmdb
-chmod +x files/etc/openclash/core/clash_meta
-status
+[[ $KERNEL_TARGET ]] && {
+    STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
+    [[ -d files/etc/openclash/core ]] || mkdir -p files/etc/openclash/core
+    CLASH_META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-$KERNEL_TARGET.tar.gz"
+    GEOIP_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
+    GEOSITE_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
+    COUNTRY_URL="https://raw.githubusercontent.com/alecthw/mmdb_china_ip_list/release/Country.mmdb"
+    wget -qO- $CLASH_META_URL | tar xOvz > files/etc/openclash/core/clash_meta
+    wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
+    wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
+    wget -qO- $COUNTRY_URL > files/etc/openclash/Country.mmdb
+    chmod +x files/etc/openclash/core/clash_meta
+    status
+}
 
 STEP_NAME='下载zsh终端工具'; BEGIN_TIME=$(date '+%H:%M:%S')
 [[ -d files/root ]] || mkdir -p files/root
-git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh ./.oh-my-zsh
-git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions files/root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting files/root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-git clone --depth=1 https://github.com/zsh-users/zsh-completions files/root/.oh-my-zsh/custom/plugins/zsh-completions
+git clone -q https://github.com/ohmyzsh/ohmyzsh ./.oh-my-zsh
+git clone -q https://github.com/zsh-users/zsh-autosuggestions files/root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git clone -q https://github.com/zsh-users/zsh-syntax-highlighting files/root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+git clone -q https://github.com/zsh-users/zsh-completions files/root/.oh-my-zsh/custom/plugins/zsh-completions
 cat >files/root/.zshrc<<-EOF
-    export ZSH=$HOME/.oh-my-zsh
+    # Path to your oh-my-zsh installation.
+    ZSH=$HOME/.oh-my-zsh
+    # Set name of the theme to load.
     ZSH_THEME="ys"
+    # Uncomment the following line to disable bi-weekly auto-update checks.
     DISABLE_AUTO_UPDATE="true"
+    # Which plugins would you like to load?
     plugins=(git command-not-found extract z docker zsh-syntax-highlighting zsh-autosuggestions zsh-completions)
     source $ZSH/oh-my-zsh.sh
     autoload -U compinit && compinit
-    EOF
+EOF
 status
-cat files/root/.zshrc
 
-STEP_NAME='下载adguardhome运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
-[[ -d files/usr/bin/AdGuardHome ]] || mkdir -p files/usr/bin/AdGuardHome
-AGH_CORE="https://github.com/AdguardTeam/AdGuardHome/releases/latest/download/AdGuardHome_linux_${1}.tar.gz"
-wget -qO- $AGH_CORE | tar xOvz > files/usr/bin/AdGuardHome/AdGuardHome
-chmod +x files/usr/bin/AdGuardHome/AdGuardHome
-status
+[[ $KERNEL_TARGET ]] && {
+    STEP_NAME='下载adguardhome运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
+    [[ -d files/usr/bin/AdGuardHome ]] || mkdir -p files/usr/bin/AdGuardHome
+    AGH_CORE="https://github.com/AdguardTeam/AdGuardHome/releases/latest/download/AdGuardHome_linux_$KERNEL_TARGET.tar.gz"
+    wget -qO- $AGH_CORE | tar xOvz > files/usr/bin/AdGuardHome/AdGuardHome
+    chmod +x files/usr/bin/AdGuardHome/AdGuardHome
+    status
+}
 
 STEP_NAME='更新配置文件'; BEGIN_TIME=$(date '+%H:%M:%S')
 make defconfig 1>/dev/null 2>&1
