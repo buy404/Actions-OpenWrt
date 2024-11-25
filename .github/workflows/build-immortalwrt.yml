@@ -128,7 +128,7 @@ jobs:
     - name: 部署
       run: bash immortalwrt_openwrt.sh
 
-    - name: Cache Toolchain
+    - name: 保存 Toolchain
       if: env.CACHE_ACTIONS == 'true'
       uses: HiGarfield/cachewrtbuild@main
       with:
@@ -137,7 +137,7 @@ jobs:
         mixkey: ${{ env.CACHE_NAME }}
         prefix: ${{ GITHUB.WORKSPACE }}/${{ env.REPO_FLODER }}
 
-    - name: Compile Toolchain
+    - name: 编译 Toolchain
       id: tools
       if: env.CACHE_ACTIONS == 'true' && !cancelled()
       run: |
