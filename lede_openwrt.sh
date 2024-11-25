@@ -11,7 +11,8 @@ if [[ $REBUILD_TOOLCHAIN = 'true' ]]; then
     du -h --max-depth=1 ./ --exclude=staging_dir
     tar -I zstdmt -cf ../output/$TOOLS_NAME.tzst staging_dir/host* staging_dir/tool* $ccache
     ls -lh ../output
-    [ -e ../output/*.tzst ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile || exit 1
+    [[ -e ../output/*.tzst ]] && \
+    sed -i 's/ $(tool.*\/stamp-compile)//' Makefile || exit 1
     exit 0
 fi
 
