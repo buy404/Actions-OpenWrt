@@ -144,7 +144,7 @@ jobs:
       run: |
         cd $REPO_FLODER
         make -j$(nproc) toolchain/compile || make -j1 V=s toolchain/compile
-        chmod +x immortalwrt_openwrt.sh && ./immortalwrt_openwrt.sh
+        $GITHUB_WORKSPACE/immortalwrt_openwrt.sh
 
     - name: Delete Old Toolchain
       if: steps.toolchain.conclusion == 'success' && !cancelled()

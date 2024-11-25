@@ -147,7 +147,7 @@ jobs:
       run: |
         cd $REPO_FLODER
         make -j$(nproc) toolchain/compile || make -j1 V=s toolchain/compile
-        chmod +x lede_openwrt.sh && ./lede_openwrt.sh
+        $GITHUB_WORKSPACE/lede_openwrt.sh
 
     - name: Delete Old Toolchain
       if: steps.toolchain.conclusion == 'success' && !cancelled()

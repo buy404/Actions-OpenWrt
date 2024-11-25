@@ -288,11 +288,10 @@ clone_all https://github.com/xiaorouji/openwrt-passwall-packages
     clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
     clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
     clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
-    clone_dir https://github.com/kiddin9/kwrt-packages luci-app-adguardhome adguardhome luci-app-bypass lua-neturl cpulimit lua-maxminddb
+    clone_dir https://github.com/kiddin9/kwrt-packages luci-app-adguardhome adguardhome luci-app-bypass lua-neturl cpulimit
     clone_all https://github.com/brvphoenix/wrtbwmon
     git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
-    [[ -e package/A/luci-app-unblockneteasemusic/root/etc/init.d/unblockneteasemusic ]] && \
-    sed -i '/log_check/s/^/#/' package/A/*/*/*/init.d/unblockneteasemusic
+    sed -i '/log_check/s/^/#/' $(_find "package/ feeds/" "luci-app-unblockneteasemusic")/root/etc/init.d/unblockneteasemusic
 }
 
 color cy "加载自定义设置"

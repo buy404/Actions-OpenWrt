@@ -5,7 +5,7 @@
 
 if [[ $REBUILD_TOOLCHAIN = 'true' ]]; then
     echo "打包toolchain"
-    cd $REPO_FLODER
+    cd $GITHUB_WORKSPACE/$REPO_FLODER
     [[ -d ".ccache" ]] && (ccache=".ccache"; ls -alh .ccache)
     du -h --max-depth=1 ./staging_dir
     du -h --max-depth=1 ./ --exclude=staging_dir
