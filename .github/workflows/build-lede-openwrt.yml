@@ -186,8 +186,8 @@ jobs:
       if: steps.organize.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true' && !cancelled()
       uses: actions/upload-artifact@v4.4.0
       with:
-        path: ${{ env.REPO_FLODER }}/bin
         name: OpenWrt-${{ env.TARGET_DEVICE }}-bin
+        path: ${{ env.REPO_FLODER }}/bin
 
     - name: Organize Files
       id: organize
