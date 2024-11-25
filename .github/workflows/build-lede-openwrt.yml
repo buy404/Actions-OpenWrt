@@ -240,6 +240,6 @@ jobs:
       with:
         keep_latest: 15
         delete_tags: true
-        delete_tag_pattern: ^.*lede$
+        delete_tag_pattern: .*lede.*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
