@@ -90,7 +90,7 @@ jobs:
         swap-storage: true
         large-packages: true
 
-    - name: Combine Disks
+    - name: Create Simulated Disk
       if: env.FREE_DISK == 'combine' || env.FREE_DISK == 'plus'
       run: |
         MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
@@ -155,7 +155,7 @@ jobs:
         tag_name: immortalwrt-Cache
         name: ${{ env.EMOJI }} immortalwrt-Cache ${{ env.EMOJI }}
 
-    - name: Download Package
+    - name: Download DL Package
       run: |
         cd $REPO_FLODER
         #make package/download -j$(nproc)
