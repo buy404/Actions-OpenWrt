@@ -298,7 +298,7 @@ clone_all https://github.com/xiaorouji/openwrt-passwall-packages
     sed -i '/log_check/s/^/#/' $(_find "package/ feeds/" "luci-app-unblockneteasemusic")/root/etc/init.d/unblockneteasemusic
 }
 
-STEP_NAME='加载自定义设置'; BEGIN_TIME=$(date '+%H:%M:%S')
+STEP_NAME='加载个人设置'; BEGIN_TIME=$(date '+%H:%M:%S')
 
 config
 
