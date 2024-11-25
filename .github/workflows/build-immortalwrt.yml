@@ -61,7 +61,7 @@ jobs:
       FREE_DISK: ${{ github.event.inputs.free_disk }}
 
     steps:
-    - name: 系统信息
+    - name: System Information
       run: |
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
@@ -79,7 +79,7 @@ jobs:
         RANDOM=$$$(date +%s); rand=$[$RANDOM % ${#Emoji[@]}]
         echo "EMOJI=${Emoji[$rand]}" >>$GITHUB_ENV
 
-    - name: jlumbroso 整理空间
+    - name: Free Disk Space
       if: env.FREE_DISK == 'free-disk-space' || env.FREE_DISK == 'plus'
       uses: jlumbroso/free-disk-space@main
       with:
@@ -90,7 +90,7 @@ jobs:
         swap-storage: true
         large-packages: true
 
-    - name: losetup 整理空间
+    - name: Combine Disks
       if: env.FREE_DISK == 'losetup' || env.FREE_DISK == 'plus'
       run: |
         MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
@@ -111,7 +111,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4.2.0
 
-    - name: 安装编译依赖
+    - name: Initialization Environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -128,7 +128,7 @@ jobs:
     - name: 部署编译信息
       run: bash immortalwrt_openwrt.sh
 
-    - name: 保存 Toolchain
+    - name: Cache Toolchain
       if: env.CACHE_ACTIONS == 'true'
       uses: HiGarfield/cachewrtbuild@main
       with:
@@ -137,7 +137,7 @@ jobs:
         mixkey: ${{ env.CACHE_NAME }}
         prefix: ${{ GITHUB.WORKSPACE }}/${{ env.REPO_FLODER }}
 
-    - name: 编译 Toolchain
+    - name: Compile Toolchain
       id: tools
       if: env.CACHE_ACTIONS == 'true' && !cancelled()
       run: |
@@ -145,7 +145,7 @@ jobs:
         make -j$(nproc) toolchain/compile || make -j1 V=s toolchain/compile
         bash immortalwrt_openwrt.sh
 
-    - name: 上传 Cache 到 Release
+    - name: Upload Cache To Release
       if: steps.tools.conclusion == 'success' || env.OUTPUT_RELEASE == 'true' && !cancelled()
       uses: softprops/action-gh-release@v2.0.8
       with:
@@ -155,7 +155,7 @@ jobs:
         tag_name: immortalwrt-Cache
         name: ${{ env.EMOJI }} immortalwrt-Cache ${{ env.EMOJI }}
 
-    - name: 下载软件包
+    - name: Download DL Package
       run: |
         cd $REPO_FLODER
         #make package/download -j$(nproc)
@@ -163,19 +163,19 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译 ${{ github.event.inputs.target }} 固件
+    - name: Compile Firmware
       id: compile
       timeout-minutes: 1440
       run: cd $REPO_FLODER && make -j$(nproc) || make -j1 V=s
 
-    - name: 上传 Bin 到 Artifact
+    - name: Upload Bin To Artifact
       if: steps.organize.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true' && !cancelled()
       uses: actions/upload-artifact@v4.4.0
       with:
         path: ${{ env.REPO_FLODER }}/bin
         name: OpenWrt-${{ env.TARGET_DEVICE }}-bin
 
-    - name: 整理筛选固件
+    - name: Organize Files
       id: organize
       if: steps.compile.conclusion == 'success' && !cancelled()
       run: |
@@ -196,21 +196,21 @@ jobs:
         echo "FIRMWARE=$PWD" >>$GITHUB_ENV
         echo "STRDATE=$(TZ=UTC-8 date +%Y-%m-%d)" >>$GITHUB_ENV
 
-    - name: 上传 Packages 到 Artifact
+    - name: Upload Packages To Artifact
       if: env.upload_packages == 'true' && env.UPLOAD_PACKAGES == 'true' && !cancelled()
       uses: actions/upload-artifact@v4.4.0
       with:
         path: firmware/*packages.tar.gz
         name: OpenWrt-${{ env.TARGET_DEVICE }}-package
 
-    - name: 上传 Firmware 到 Artifact
+    - name: Upload Firmware To Artifact
       if: env.upload_firmware == 'true' && env.UPLOAD_SYSUPGRADE == 'true' && !cancelled()
       uses: actions/upload-artifact@v4.4.0
       with:
         path: firmware/*${{ env.FIRMWARE_TYPE }}*
         name: OpenWrt-${{ env.TARGET_DEVICE }}-firmware
 
-    - name: 上传 Firmware 到 Release
+    - name: Upload Firmware To Release
       if: env.upload_firmware == 'true' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       uses: softprops/action-gh-release@v2.0.8
       with:
