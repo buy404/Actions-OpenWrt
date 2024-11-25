@@ -238,6 +238,8 @@ config (){
 			CONFIG_TARGET_armvirt_64=y
 			CONFIG_TARGET_armvirt_64_Default=y
 			EOF
+            KERNEL_TARGET=arm64
+            echo echo "KERNEL_TARGET=$KERNEL_TARGET" >>$GITHUB_ENV
 			;;
 	esac
 }
@@ -633,7 +635,7 @@ sed -i '/bridge\|vssr\|deluge/d' .config
     GEOIP_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
     GEOSITE_URL="https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
     COUNTRY_URL="https://raw.githubusercontent.com/alecthw/mmdb_china_ip_list/release/Country.mmdb"
-    wget -qO- $CLASH_META_URL | tar xOvz > files/etc/openclash/core/clash_meta
+    wget -qO- $CLASH_META_URL | tar xOvz > files/etc/openclash/core/clash_meta 1>/dev/null 2>&1
     wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
     wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
     wget -qO- $COUNTRY_URL > files/etc/openclash/Country.mmdb
@@ -665,7 +667,7 @@ status
     STEP_NAME='下载adguardhome运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
     [[ -d files/usr/bin/AdGuardHome ]] || mkdir -p files/usr/bin/AdGuardHome
     AGH_CORE="https://github.com/AdguardTeam/AdGuardHome/releases/latest/download/AdGuardHome_linux_$KERNEL_TARGET.tar.gz"
-    wget -qO- $AGH_CORE | tar xOvz > files/usr/bin/AdGuardHome/AdGuardHome
+    wget -qO- $AGH_CORE | tar xOvz > files/usr/bin/AdGuardHome/AdGuardHome 1>/dev/null 2>&1
     chmod +x files/usr/bin/AdGuardHome/AdGuardHome
     status
 }
