@@ -125,7 +125,7 @@ jobs:
         sudo -E apt-get -y clean) &
         sudo -E timedatectl set-timezone "Asia/Shanghai"
 
-    - name: 部署
+    - name: 部署编译信息
       run: bash immortalwrt_openwrt.sh
 
     - name: 保存 Toolchain
