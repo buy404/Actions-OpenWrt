@@ -298,7 +298,7 @@ clone_all https://github.com/xiaorouji/openwrt-passwall-packages
     sed -i '/log_check/s/^/#/' $(_find "package/ feeds/" "luci-app-unblockneteasemusic")/root/etc/init.d/unblockneteasemusic
 }
 
-color cy "加载自定义设置"
+STEP_NAME='加载自定义设置'; BEGIN_TIME=$(date '+%H:%M:%S')
 
 config
 
@@ -553,7 +553,7 @@ $(eval $(call Py3BasePackage,python3-uuid, \
 ))
 EOF
 
-sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' $(find package/ feeds/ -type d -name luci-app-pass* -print)/Makefile
+sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' $(_find "package/ feeds/" "luci-app-passwall")/Makefile
 sed -i '/bridged/d; /deluge/d; /transmission/d' .config
 
 sed -i \
@@ -569,6 +569,7 @@ for e in $(ls -d package/A/luci-*/po feeds/luci/applications/luci-*/po); do
         ln -s zh_Hans $e/zh-cn 2>/dev/null
     fi
 done
+status
 
 [[ $KERNEL_TARGET ]] && {
     STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
