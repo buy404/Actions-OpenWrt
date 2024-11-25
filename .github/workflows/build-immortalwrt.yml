@@ -108,7 +108,7 @@ jobs:
         sudo mount -o compress=zstd $LV_NAME $GITHUB_WORKSPACE
         sudo chown -R runner:runner $GITHUB_WORKSPACE && df -hT
 
-    - name: Checkout
+    - name: Checkout Repo
       uses: actions/checkout@v4.2.0
 
     - name: Initialization Environment
