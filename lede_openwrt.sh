@@ -486,7 +486,6 @@ case $TARGET_DEVICE in
 esac
 
 if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
-    REPO_BRANCH="18.06"
     sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_NAME-$(TZ=UTC-8 date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
     sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
     sed -i 's/option enabled.*/option enabled 1/' feeds/*/*/*/*/upnpd.config
