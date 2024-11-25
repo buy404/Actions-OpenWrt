@@ -339,7 +339,7 @@ rm -rf feeds/*/*/luci-app-appfilter
     clone_dir openwrt-23.05 https://github.com/immortalwrt/luci luci-app-syncdial luci-app-mwan3
 }
 
-color cy "加载自定义设置"
+STEP_NAME='加载自定义设置'; BEGIN_TIME=$(date '+%H:%M:%S')
 
 config
 
@@ -644,6 +644,7 @@ for e in $(ls -d package/A/luci-*/po feeds/luci/applications/luci-*/po); do
         ln -s zh_Hans $e/zh-cn 2>/dev/null
     fi
 done
+status
 
 [[ $KERNEL_TARGET ]] && {
     STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
