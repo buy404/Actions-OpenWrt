@@ -7,35 +7,35 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: '选择ImmortalWrt仓库分支：'
-        default: 'openwrt-23.05'
+        description: '选择源码仓库分支'
         required: true
+        default: 'openwrt-23.05'
         type: choice
-        options: [openwrt-21.02, openwrt-23.05, master, openwrt-18.06-k5.4, openwrt-18.06]
+        options: [master, openwrt-21.02, openwrt-23.05, openwrt-18.06, openwrt-18.06-k5.4]
 
       target:
-        description: '选择要编译的机型：'
-        default: 'x86_64'
+        description: '选择要编译的机型'
         required: true
+        default: 'x86_64'
         type: choice
-        options: [x86_64, r1-plus-lts, newifi-d2, asus_rt-n16, phicomm_k2p, armvirt-64-default, r4s, r2s, r2c]
+        options: [x86_64, r1-plus-lts, r2c, r2s, r4s, cnewifi-d2, asus_rt-n16, phicomm_k2p, armvirt-64-default]
 
       ip:
-        description: '设置web登录IP：'
-        default: '192.168.2.1'
+        description: '设置web登录IP'
         required: false
+        default: '192.168.2.1'
 
       partsize:
-        description: '设置rootfs大小：'
-        default: '800'
+        description: '设置rootfs大小'
         required: false
+        default: '800'
 
       free_disk:
         description: '整理空间'
-        type: choice
-        default: 'false'
-        options: [losetup, free-disk-space, plus, no]
         required: false
+        default: 'false'
+        type: choice
+        options: [no, losetup, free-disk-space, plus]
 
 env:
   REPO_FLODER: openwrt
@@ -54,11 +54,11 @@ jobs:
       contents: write
 
     env:
+      REPO_BRANCH: ${{ github.event.inputs.branch }}
+      TARGET_DEVICE: ${{ github.event.inputs.target }}
       IP: ${{ github.event.inputs.ip }}
       PARTSIZE: ${{ github.event.inputs.partsize }}
-      REPO_BRANCH: ${{ github.event.inputs.branch }}
       FREE_DISK: ${{ github.event.inputs.free_disk }}
-      TARGET_DEVICE: ${{ github.event.inputs.target }}
 
     steps:
     - name: 系统信息
@@ -163,7 +163,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 固件编译
+    - name: 编译固件
       id: compile
       timeout-minutes: 1440
       run: cd $REPO_FLODER && make -j$(nproc) || make -j1 V=s
@@ -220,7 +220,7 @@ jobs:
         tag_name: ${{ env.STRDATE }}-immortalwrt
         name: ${{ env.EMOJI }} ${{ env.STRDATE }} immortalwrt-firmware ${{ env.EMOJI }}
 
-    - name: Delete Releases
+    - name: Delete Old Releases
       if: (!cancelled())
       uses: dev-drprasad/delete-older-releases@v0.3.4
       with:
