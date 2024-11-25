@@ -93,7 +93,6 @@ jobs:
     - name: losetup 整理空间
       if: env.FREE_DISK == 'losetup' || env.FREE_DISK == 'plus'
       run: |
-        [ -f /mnt/swapfile ] && sudo swapoff -a && sudo rm -f /mnt/swapfile
         MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
         sudo fallocate -l $MNT_SIZE /mnt/mnt.img
         MNT_NAME=$(sudo losetup -Pf --show /mnt/mnt.img)
@@ -118,6 +117,7 @@ jobs:
       run: |
         (docker rmi $(docker images -q)
         sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
         sudo -E apt-get -y update
         sudo -E apt-get -y install clang rename $(curl -fsSL is.gd/depends_ubuntu_2204)
         sudo -E systemctl daemon-reload
@@ -132,7 +132,7 @@ jobs:
       if: env.CACHE_ACTIONS == 'true'
       uses: HiGarfield/cachewrtbuild@main
       with:
-        ccache: true
+        ccache: ${{ env.CACHE }}
         clean: ${{ env.CLEAN }}
         mixkey: ${{ env.CACHE_NAME }}
         prefix: ${{ GITHUB.WORKSPACE }}/${{ env.REPO_FLODER }}
