@@ -650,16 +650,16 @@ git clone -q https://github.com/zsh-users/zsh-autosuggestions files/root/.oh-my-
 git clone -q https://github.com/zsh-users/zsh-syntax-highlighting files/root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git clone -q https://github.com/zsh-users/zsh-completions files/root/.oh-my-zsh/custom/plugins/zsh-completions
 cat >files/root/.zshrc<<-EOF
-	# Path to your oh-my-zsh installation.
-	ZSH=$HOME/.oh-my-zsh
-	# Set name of the theme to load.
-	ZSH_THEME="ys"
-	# Uncomment the following line to disable bi-weekly auto-update checks.
-	DISABLE_AUTO_UPDATE="true"
-	# Which plugins would you like to load?
-	plugins=(git command-not-found extract z docker zsh-syntax-highlighting zsh-autosuggestions zsh-completions)
-	source $ZSH/oh-my-zsh.sh
-	autoload -U compinit && compinit
+# Path to your oh-my-zsh installation.
+ZSH=$HOME/.oh-my-zsh
+# Set name of the theme to load.
+ZSH_THEME="ys"
+# Uncomment the following line to disable bi-weekly auto-update checks.
+DISABLE_AUTO_UPDATE="true"
+# Which plugins would you like to load?
+plugins=(git command-not-found extract z docker zsh-syntax-highlighting zsh-autosuggestions zsh-completions)
+source $ZSH/oh-my-zsh.sh
+autoload -U compinit && compinit
 EOF
 status
 
