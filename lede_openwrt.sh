@@ -274,6 +274,29 @@ STEP_NAME='更新&安装软件'; BEGIN_TIME=$(date '+%H:%M:%S')
 ./scripts/feeds install -a 1>/dev/null 2>&1
 status
 
+color cy "添加&替换插件"
+clone_all https://github.com/hong0980/build
+clone_all https://github.com/fw876/helloworld
+clone_all https://github.com/xiaorouji/openwrt-passwall-packages
+
+[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
+    git_clone https://github.com/zzsj0928/luci-app-pushbot
+    git_clone https://github.com/yaof2/luci-app-ikoolproxy
+    clone_all https://github.com/destan19/OpenAppFilter
+    # clone_dir https://github.com/sbwml/openwrt_helloworld xray-core v2ray-core v2ray-geodata sing-box
+    clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
+    clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
+    clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
+    clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
+    clone_dir https://github.com/kiddin9/kwrt-packages luci-app-adguardhome adguardhome luci-app-bypass lua-neturl cpulimit lua-maxminddb
+    clone_all https://github.com/brvphoenix/wrtbwmon
+    git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
+    [[ -e package/A/luci-app-unblockneteasemusic/root/etc/init.d/unblockneteasemusic ]] && \
+    sed -i '/log_check/s/^/#/' package/A/*/*/*/init.d/unblockneteasemusic
+}
+
+color cy "加载自定义设置"
+
 config
 
 cat >>.config <<-EOF
@@ -319,77 +342,6 @@ cat >>.config <<-EOF
 	# CONFIG_PACKAGE_luci-app-uugamebooster is not set
 EOF
 
-color cy "加载自定义设置"
-config_generate="package/base-files/files/bin/config_generate"
-wget -qO package/base-files/files/etc/banner git.io/JoNK8
-if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
-    REPO_BRANCH="18.06"
-    sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_NAME-$(TZ=UTC-8 date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
-    sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
-    sed -i 's/option enabled.*/option enabled 1/' feeds/*/*/*/*/upnpd.config
-    sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
-    sed -i 's/UTC/UTC-8/' Makefile
-    sed -i "{
-            /upnp/d;/banner/d;/openwrt_release/d;/shadow/d
-            s|zh_cn|zh_cn\nuci set luci.main.mediaurlbase=/luci-static/bootstrap|
-            \$i sed -i 's/root::.*/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow\n[ -f '/bin/bash' ] && sed -i '/\\\/ash$/s/ash/bash/' /etc/passwd
-            }" $(find package/ -type f -name "*default-settings" 2>/dev/null)
-fi
-
-clone_all https://github.com/hong0980/build
-clone_all https://github.com/fw876/helloworld
-clone_all https://github.com/xiaorouji/openwrt-passwall-packages
-
-[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
-    git_clone https://github.com/zzsj0928/luci-app-pushbot
-    git_clone https://github.com/yaof2/luci-app-ikoolproxy
-    clone_all https://github.com/destan19/OpenAppFilter
-    # clone_dir https://github.com/sbwml/openwrt_helloworld xray-core v2ray-core v2ray-geodata sing-box
-    clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
-    clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
-    clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
-    clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
-    git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
-    clone_dir https://github.com/kiddin9/kwrt-packages luci-app-adguardhome adguardhome luci-app-bypass lua-neturl cpulimit lua-maxminddb
-
-    [[ -e package/A/luci-app-unblockneteasemusic/root/etc/init.d/unblockneteasemusic ]] && \
-    sed -i '/log_check/s/^/#/' package/A/*/*/*/init.d/unblockneteasemusic
-    for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
-        if grep -q "Kernel Version" $d; then
-            sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
-            sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
-            sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
-        fi
-    done
-    _packages "luci-app-argon-config luci-theme-argon"
-    clone_all https://github.com/brvphoenix/wrtbwmon
-    sed -i 's/ariang/ariang +webui-aria2/g' feeds/*/*/luci-app-aria2/Makefile
-}
-echo -e '\nwww.nicept.net' | \
-tee -a $(find package/A/luci-* feeds/luci/applications/luci-* -type f -name "black.list" -o -name "proxy_host" 2>/dev/null | grep "ss") >/dev/null
-
-mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
-[[ -f $mwan3 ]] && grep -q "8.8" $mwan3 && \
-sed -i '/8.8/d' $mwan3
-
-# echo '<iframe src="https://ip.skk.moe/simple" style="width: 100%; border: 0"></iframe>' | \
-# tee -a {$(find package/ feeds/luci/applications/ -type d -name "luci-app-vssr" 2>/dev/null)/*/*/*/status_top.htm,$(find package/ feeds/luci/applications/ -type d -name "luci-app-ssr-plus" 2>/dev/null)/*/*/*/status.htm,$(find package/ feeds/luci/applications/ -type d -name "luci-app-bypass" 2>/dev/null)/*/*/*/status.htm,$(find package/ feeds/luci/applications/ -type d -name "luci-app-passwall" 2>/dev/null)/*/*/*/global/status.htm} >/dev/null
-xb=$(_find "package/ feeds/" "luci-app-bypass")
-[[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
-qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
-libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
-xc=$(_find "package/ feeds/" "qBittorrent-static")
-[[ -d $xc ]] && [[ $qBittorrent_version ]] && \
-    sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
-xd=$(_find "package/ feeds/" "luci-app-turboacc")
-[[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
-xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
-[[ -d $xe ]] && sed -i '/echo .*root/ s/echo /[ $time =~ [0-9]+ ] \&\& echo /' $xe/root/etc/init.d/koolproxy
-xg=$(_find "package/ feeds/" "luci-app-pushbot")
-[[ -d $xg ]] && {
-    sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
-    sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
-}
 _packages "
 luci-app-aria2
 luci-app-cifs-mount
@@ -413,22 +365,8 @@ luci-theme-opentomato
 axel patch diffutils collectd-mod-ping collectd-mod-thermal wpad-wolfssl
 "
 
-trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
-[[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
-raw.githubusercontent.com/hong0980/diy/master/files/transmission/tr$trv.patch 1>/dev/null 2>&1
-
-cat <<-\EOF >feeds/packages/lang/python/python3/files/python3-package-uuid.mk
-define Package/python3-uuid
-$(call Package/python3/Default)
-TITLE:=Python $(PYTHON3_VERSION) UUID module
-DEPENDS:=+python3-light +libuuid
-endef
-
-$(eval $(call Py3BasePackage,python3-uuid, \
-/usr/lib/python$(PYTHON3_VERSION)/uuid.py \
-/usr/lib/python$(PYTHON3_VERSION)/lib-dynload/_uuid.$(PYTHON3_SO_SUFFIX) \
-))
-EOF
+config_generate="package/base-files/files/bin/config_generate"
+wget -qO package/base-files/files/etc/banner git.io/JoNK8
 
 case $TARGET_DEVICE in
 "newifi-d2")
@@ -529,9 +467,9 @@ case $TARGET_DEVICE in
 
     # wget -qO feeds/luci/applications/luci-app-qbittorrent/Makefile https://raw.githubusercontent.com/immortalwrt/luci/openwrt-18.06/applications/luci-app-qbittorrent/Makefile
     # sed -i 's/-Enhanced-Edition//' feeds/luci/applications/luci-app-qbittorrent/Makefile
-    sed -i 's/@arm/@TARGET_armvirt_64/g' $(find . -type d -name "luci-app-cpufreq" 2>/dev/null)/Makefile
+    sed -i 's/arm/arm||TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile
     sed -i "s/default 160/default $PARTSIZE/" config/Config-images.in
-    sed -e 's/services/system/; s/00//' $(find . -type d -name "luci-app-cpufreq" 2>/dev/null)/luasrc/controller/cpufreq.lua -i
+    sed -e 's/services/system/; s/00//' $(_find "package/ feeds/" "luci-app-cpufreq")/luasrc/controller/cpufreq.lua -i
     [ -d ../opt/openwrt_packit ] && {
         sed -i '{
         s|mv |mv -v |
@@ -542,6 +480,78 @@ case $TARGET_DEVICE in
     }
     ;;
 esac
+
+if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
+    REPO_BRANCH="18.06"
+    sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_NAME-$(TZ=UTC-8 date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
+    sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
+    sed -i 's/option enabled.*/option enabled 1/' feeds/*/*/*/*/upnpd.config
+    sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
+    sed -i 's/UTC/UTC-8/' Makefile
+    sed -i "{
+            /upnp/d;/banner/d;/openwrt_release/d;/shadow/d
+            s|zh_cn|zh_cn\nuci set luci.main.mediaurlbase=/luci-static/bootstrap|
+            \$i sed -i 's/root::.*/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow\n[ -f '/bin/bash' ] && sed -i '/\\\/ash$/s/ash/bash/' /etc/passwd
+            }" $(find package/ -type f -name "*default-settings" 2>/dev/null)
+fi
+
+[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
+    for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
+        if grep -q "Kernel Version" $d; then
+            sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
+            sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
+            sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
+        fi
+    done
+    _packages "luci-app-argon-config luci-theme-argon"
+    sed -i 's/ariang/ariang +webui-aria2/g' feeds/*/*/luci-app-aria2/Makefile
+}
+
+echo -e '\nwww.nicept.net' | \
+tee -a $(find package/A/luci-* feeds/luci/applications/luci-* -type f -name "black.list" -o -name "proxy_host" 2>/dev/null | grep "ss") >/dev/null
+
+mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
+[[ -f $mwan3 ]] && grep -q "8.8" $mwan3 && \
+sed -i '/8.8/d' $mwan3
+
+# echo '<iframe src="https://ip.skk.moe/simple" style="width: 100%; border: 0"></iframe>' | \
+# tee -a {$(_find "package/ feeds/" "luci-app-vssr")/*/*/*/status_top.htm,$(_find "package/ feeds/" "luci-app-ssr-plus")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-bypass")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-passwall")/*/*/*/global/status.htm} >/dev/null
+xb=$(_find "package/ feeds/" "luci-app-bypass")
+[[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
+qBittorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
+libtorrent_version=$(curl -sL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
+xc=$(_find "package/ feeds/" "qBittorrent-static")
+[[ -d $xc ]] && [[ $qBittorrent_version ]] && \
+    sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
+xd=$(_find "package/ feeds/" "luci-app-turboacc")
+[[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
+xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
+[[ -d $xe ]] && sed -i '/echo .*root/ s/echo /[ $time =~ [0-9]+ ] \&\& echo /' $xe/root/etc/init.d/koolproxy
+xg=$(_find "package/ feeds/" "luci-app-pushbot")
+[[ -d $xg ]] && {
+    sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
+    sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
+}
+
+trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
+[[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
+raw.githubusercontent.com/hong0980/diy/master/files/transmission/tr$trv.patch 1>/dev/null 2>&1
+
+cat <<-\EOF >feeds/packages/lang/python/python3/files/python3-package-uuid.mk
+define Package/python3-uuid
+$(call Package/python3/Default)
+TITLE:=Python $(PYTHON3_VERSION) UUID module
+DEPENDS:=+python3-light +libuuid
+endef
+
+$(eval $(call Py3BasePackage,python3-uuid, \
+/usr/lib/python$(PYTHON3_VERSION)/uuid.py \
+/usr/lib/python$(PYTHON3_VERSION)/lib-dynload/_uuid.$(PYTHON3_SO_SUFFIX) \
+))
+EOF
+
+sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' package/A/luci-app-pass*/Makefile
+sed -i '/bridged/d; /deluge/d; /transmission/d' .config
 
 sed -i \
     -e 's|\.\./\.\./luci.mk|$(TOPDIR)/feeds/luci/luci.mk|' \
@@ -556,11 +566,6 @@ for e in $(ls -d package/A/luci-*/po feeds/luci/applications/luci-*/po); do
         ln -s zh_Hans $e/zh-cn 2>/dev/null
     fi
 done
-
-sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' package/A/luci-app-pass*/Makefile
-
-sed -i '/bridged/d; /deluge/d; /transmission/d' .config
-
 
 [[ $KERNEL_TARGET ]] && {
     STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')

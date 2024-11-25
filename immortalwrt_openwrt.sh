@@ -628,6 +628,9 @@ esac
     curl -sSo include/openssl-module.mk https://raw.githubusercontent.com/immortalwrt/immortalwrt/master/include/openssl-module.mk
 }
 
+[[ "$REPO_BRANCH" =~ master ]] && sed -i '/deluge/d' .config
+sed -i '/bridge\|vssr\|deluge/d' .config
+
 sed -i \
     -e 's|\.\./\.\./luci.mk|$(TOPDIR)/feeds/luci/luci.mk|' \
     -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' \
@@ -641,9 +644,6 @@ for e in $(ls -d package/A/luci-*/po feeds/luci/applications/luci-*/po); do
         ln -s zh_Hans $e/zh-cn 2>/dev/null
     fi
 done
-
-[[ "$REPO_BRANCH" =~ master ]] && sed -i '/deluge/d' .config
-sed -i '/bridge\|vssr\|deluge/d' .config
 
 [[ $KERNEL_TARGET ]] && {
     STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
