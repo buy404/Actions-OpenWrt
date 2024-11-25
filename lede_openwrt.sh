@@ -249,6 +249,10 @@ esac
 #KERNEL_VERSION=$(awk -F '-' '/KERNEL/{print $2}' include/kernel-$KERNEL | awk '{print $1}')
 #echo "KERNEL_VERSION=$KERNEL_VERSION" >> $GITHUB_ENV
 
+[[ $REPO_BRANCH == master ]] && sed -i '/luci/s/^#//; /openwrt-23.05/s/^/#/' feeds.conf.default
+#echo "REPO_BRANCH=18.06" >>$GITHUB_ENV
+#echo "REPO_BRANCH=${REPO_BRANCH#*-}" >>$GITHUB_ENV
+
 SOURCE_NAME=$(basename $REPO_URL)
 TOOLS_HASH=$(git log --pretty=tformat:"%h" -n1 tools toolchain)
 CACHE_NAME="$SOURCE_NAME-${REPO_BRANCH#*-}-$DEVICE_NAME"
@@ -626,9 +630,5 @@ echo "CACHE=false" >>$GITHUB_ENV
 echo "CLEAN=false" >>$GITHUB_ENV
 echo "UPLOAD_BIN_DIR=false" >>$GITHUB_ENV
 echo "FIRMWARE_TYPE=$FIRMWARE_TYPE" >>$GITHUB_ENV
-
-[[ $REPO_BRANCH =~ 23.05 ]] && \
-echo "REPO_BRANCH=${REPO_BRANCH#*-}" >>$GITHUB_ENV || \
-echo "REPO_BRANCH=18.06" >>$GITHUB_ENV
 
 echo -e "\e[1;35m脚本运行完成！\e[0m"
