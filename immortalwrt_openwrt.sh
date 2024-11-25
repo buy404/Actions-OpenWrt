@@ -4,14 +4,14 @@
 [[ -d firmware ]] || mkdir firmware
 
 if [[ $REBUILD_TOOLCHAIN = 'true' ]]; then
-    echo "打包toolchain"
+    echo "开始打包toolchain"
     cd $GITHUB_WORKSPACE/$REPO_FLODER
     [[ -d ".ccache" ]] && (ccache=".ccache"; ls -alh .ccache)
     du -h --max-depth=1 ./staging_dir
     du -h --max-depth=1 ./ --exclude=staging_dir
     tar -I zstdmt -cf ../output/$TOOLS_NAME.tzst staging_dir/host* staging_dir/tool* $ccache
     ls -lh ../output
-    [ -e *.tzst ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile || exit 1
+    [ -e ../output/*.tzst ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile || exit 1
     exit 0
 fi
 
