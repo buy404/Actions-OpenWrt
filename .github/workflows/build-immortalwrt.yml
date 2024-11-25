@@ -31,11 +31,11 @@ on:
         default: '800'
 
       free_disk:
-        description: '整理空间'
+        description: '释放磁盘空间'
         required: false
         default: 'false'
         type: choice
-        options: [no, losetup, free-disk-space, plus]
+        options: [no, combine, plus]
 
 env:
   REPO_FLODER: openwrt
@@ -80,7 +80,7 @@ jobs:
         echo "EMOJI=${Emoji[$rand]}" >>$GITHUB_ENV
 
     - name: Free Disk Space
-      if: env.FREE_DISK == 'free-disk-space' || env.FREE_DISK == 'plus'
+      if: env.FREE_DISK == 'plus'
       uses: jlumbroso/free-disk-space@main
       with:
         dotnet: true
@@ -91,7 +91,7 @@ jobs:
         large-packages: true
 
     - name: Combine Disks
-      if: env.FREE_DISK == 'losetup' || env.FREE_DISK == 'plus'
+      if: env.FREE_DISK == 'combine' || env.FREE_DISK == 'plus'
       run: |
         MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
         sudo fallocate -l $MNT_SIZE /mnt/mnt.img
@@ -125,7 +125,7 @@ jobs:
         sudo -E apt-get -y clean) &
         sudo -E timedatectl set-timezone "Asia/Shanghai"
 
-    - name: 部署编译信息
+    - name: Deploy Compile Info
       run: bash immortalwrt_openwrt.sh
 
     - name: Cache Toolchain
@@ -135,7 +135,7 @@ jobs:
         ccache: ${{ env.CACHE }}
         clean: ${{ env.CLEAN }}
         mixkey: ${{ env.CACHE_NAME }}
-        prefix: ${{ GITHUB.WORKSPACE }}/${{ env.REPO_FLODER }}
+        prefix: ${{ env.REPO_FLODER }}
 
     - name: Compile Toolchain
       id: tools
@@ -145,7 +145,7 @@ jobs:
         make -j$(nproc) toolchain/compile || make -j1 V=s toolchain/compile
         bash immortalwrt_openwrt.sh
 
-    - name: Upload Cache To Release
+    - name: Upload Toolchain To Release
       if: steps.tools.conclusion == 'success' || env.OUTPUT_RELEASE == 'true' && !cancelled()
       uses: softprops/action-gh-release@v2.0.8
       with:
