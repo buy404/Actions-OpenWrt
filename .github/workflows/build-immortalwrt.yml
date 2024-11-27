@@ -95,7 +95,6 @@ jobs:
         df -hT
 
     - name: Free Disk Space
-      if: github.event.inputs.free_disk == 'plus'
       uses: jlumbroso/free-disk-space@main
       with:
         tool-cache: false
