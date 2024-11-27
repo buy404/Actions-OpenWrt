@@ -86,9 +86,24 @@ jobs:
         docker-images: true
         swap-storage: true
 
-    - name: Maximize Build Space
+    - name: Initialization Environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        docker rmi $(docker images -q)
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
+        (sudo -E apt-get -y update
+        sudo -E apt-get -y install clang rename $(curl -fsSL is.gd/depends_ubuntu_2204)
+        sudo -E systemctl daemon-reload
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get -y clean) &
+        sudo -E timedatectl set-timezone "$TZ"
+        df -hT
+
     - name: Create Simulated Disk
-      if: github.event.inputs.free_disk == 'losetup' || github.event.inputs.free_disk == 'plus'
       run: |
         MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
         sudo fallocate -l $MNT_SIZE /mnt/mnt.img
@@ -107,22 +122,6 @@ jobs:
 
     - name: Checkout Repo
       uses: actions/checkout@v4.2.0
-
-    - name: Initialization Environment
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-        docker rmi $(docker images -q)
-        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
-        sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
-        (sudo -E apt-get -y update
-        sudo -E apt-get -y install clang rename $(curl -fsSL is.gd/depends_ubuntu_2204)
-        sudo -E systemctl daemon-reload
-        sudo -E apt-get -y autoremove --purge
-        sudo -E apt-get -y clean) &
-        sudo -E timedatectl set-timezone "$TZ"
 
     - name: Load Compile Script
       run: chmod +x immortalwrt.sh && ./immortalwrt.sh
