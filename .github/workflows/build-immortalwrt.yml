@@ -79,18 +79,6 @@ jobs:
         ls -lh /opt/hostedtoolcache
         ls -lh /etc/apt
 
-    - name: Free Disk Space
-      if: github.event.inputs.free_disk == 'plus'
-      uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        docker-images: true
-        swap-storage: true
-
     - name: Initialization Environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -105,6 +93,18 @@ jobs:
         sudo -E apt-get -y clean) &
         sudo -E timedatectl set-timezone "$TZ"
         df -hT
+
+    - name: Free Disk Space
+      if: github.event.inputs.free_disk == 'plus'
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
 
     - name: Create Simulated Disk
       run: |
