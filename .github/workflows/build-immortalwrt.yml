@@ -73,6 +73,11 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
         echo "==========================硬盘信息=========================="
         echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+        ls -lh /usr/share
+        ls -lh /usr/local/lib
+        ls -lh /opt
+        ls -lh /opt/hostedtoolcache
+        ls -lh /etc/apt
 
     - name: Free Disk Space
       if: github.event.inputs.free_disk == 'plus'
@@ -90,10 +95,8 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
         docker rmi $(docker images -q)
-        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/Android /opt/ghc /opt/hostedtoolcache/CodeQL
         sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
         (sudo -E apt-get -y update
         sudo -E apt-get -y install clang rename $(curl -fsSL is.gd/depends_ubuntu_2204)
