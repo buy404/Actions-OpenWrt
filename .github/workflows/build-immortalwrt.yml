@@ -86,6 +86,7 @@ jobs:
         docker-images: true
         swap-storage: true
 
+    - name: Maximize Build Space
     - name: Create Simulated Disk
       if: github.event.inputs.free_disk == 'losetup' || github.event.inputs.free_disk == 'plus'
       run: |
@@ -111,10 +112,12 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        (docker rmi $(docker images -q)
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        docker rmi $(docker images -q)
         sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
         sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
-        sudo -E apt-get -y update
+        (sudo -E apt-get -y update
         sudo -E apt-get -y install clang rename $(curl -fsSL is.gd/depends_ubuntu_2204)
         sudo -E systemctl daemon-reload
         sudo -E apt-get -y autoremove --purge
