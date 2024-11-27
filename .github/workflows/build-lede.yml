@@ -95,7 +95,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         docker rmi $(docker images -q)
-        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android
         sudo swapoff -a && sudo rm -f /swapfile /mnt/swapfile
         (sudo -E apt-get -y update
         sudo -E apt-get -y install clang rename $(curl -fsSL is.gd/depends_ubuntu_2204)
@@ -106,7 +106,6 @@ jobs:
         df -hT
 
     - name: Create Simulated Disk
-      if: github.event.inputs.free_disk == 'losetup' || github.event.inputs.free_disk == 'plus'
       run: |
         MNT_SIZE=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
         sudo fallocate -l $MNT_SIZE /mnt/mnt.img
