@@ -398,6 +398,40 @@ axel patch diffutils collectd-mod-ping collectd-mod-thermal wpad-wolfssl
     "
 }
 
+if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
+    # sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
+    # sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
+    sed -i 's/option enabled.*/option enabled 1/' feeds/*/*/*/*/upnpd.config
+    sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
+    sed -i 's/UTC/UTC-8/' Makefile
+    sed -i "{
+            /upnp/d;/banner/d;/openwrt_release/d;/shadow/d
+            s|zh_cn|zh_cn\nuci set luci.main.mediaurlbase=/luci-static/bootstrap|
+            \$i sed -i 's/root::.*/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow\n[ -f '/bin/bash' ] && sed -i '/\\\/ash$/s/ash/bash/' /etc/passwd
+            }" $(find package/ -type f -name "*default-settings" 2>/dev/null)
+fi
+
+[[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ]] && {
+    for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
+        if grep -q "Kernel Version" $d; then
+            sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
+            sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
+            sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
+        fi
+    done
+    _packages "
+    luci-app-argon-config
+    luci-theme-argon
+    luci-app-alist
+    luci-app-ddns-go
+    luci-app-homeproxy
+    luci-app-mihomo
+    luci-app-mosdns
+    luci-app-smartdns
+    "
+    sed -i 's/ariang/ariang +webui-aria2/g' feeds/*/*/luci-app-aria2/Makefile
+}
+
 config_generate="package/base-files/files/bin/config_generate"
 wget -qO package/base-files/files/etc/banner git.io/JoNK8
 
@@ -512,40 +546,6 @@ case "$TARGET_DEVICE" in
         }
         ;;
 esac
-
-if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
-    # sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
-    # sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
-    sed -i 's/option enabled.*/option enabled 1/' feeds/*/*/*/*/upnpd.config
-    sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
-    sed -i 's/UTC/UTC-8/' Makefile
-    sed -i "{
-            /upnp/d;/banner/d;/openwrt_release/d;/shadow/d
-            s|zh_cn|zh_cn\nuci set luci.main.mediaurlbase=/luci-static/bootstrap|
-            \$i sed -i 's/root::.*/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow\n[ -f '/bin/bash' ] && sed -i '/\\\/ash$/s/ash/bash/' /etc/passwd
-            }" $(find package/ -type f -name "*default-settings" 2>/dev/null)
-fi
-
-[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
-    for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
-        if grep -q "Kernel Version" $d; then
-            sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
-            sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
-            sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
-        fi
-    done
-    _packages "
-    luci-app-argon-config
-    luci-theme-argon
-    luci-app-alist
-    luci-app-ddns-go
-    luci-app-homeproxy
-    luci-app-mihomo
-    luci-app-mosdns
-    luci-app-smartdns
-    "
-    sed -i 's/ariang/ariang +webui-aria2/g' feeds/*/*/luci-app-aria2/Makefile
-}
 
 echo -e '\nwww.nicept.net' | \
 tee -a $(find package/A/luci-* feeds/luci/applications/luci-* -type f -name "black.list" -o -name "proxy_host" 2>/dev/null | grep "ss") >/dev/null
