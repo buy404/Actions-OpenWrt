@@ -527,6 +527,12 @@ esac
     luci-app-uhttpd
     luci-app-control-webrestriction
     luci-app-cowbbonding
+    luci-app-alist
+    luci-app-ddns-go
+    luci-app-homeproxy
+    luci-app-mihomo
+    luci-app-mosdns
+    luci-app-smartdns
     "
     trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
     [[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
