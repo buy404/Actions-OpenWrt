@@ -404,96 +404,7 @@ sed -i "s/ImmortalWrt/OpenWrt/g" {$config_generate,include/version.mk}
 sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
 sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
 
-case "$TARGET_DEVICE" in
-    "x86_64")
-        FIRMWARE_TYPE="squashfs-combined"
-        [[ -n $DEFAULT_IP ]] && \
-        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
-        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        _packages "
-        luci-app-adbyby-plus
-        luci-app-adguardhome
-        luci-app-passwall2
-        #luci-app-amule
-        luci-app-dockerman
-        luci-app-netdata
-        luci-app-poweroff
-        luci-app-qbittorrent
-        #luci-app-smartdns
-        luci-app-ikoolproxy
-        luci-app-deluge
-        #luci-app-godproxy
-        #luci-app-frpc
-        luci-app-unblockneteasemusic
-        #AmuleWebUI-Reloaded htop lscpu lsscsi lsusb nano pciutils screen webui-aria2 zstd pv
-        #subversion-client #unixodbc #git-http
-        "
-        wget -qO package/base-files/files/bin/bpm git.io/bpm && chmod +x package/base-files/files/bin/bpm
-        wget -qO package/base-files/files/bin/ansi git.io/ansi && chmod +x package/base-files/files/bin/ansi
-        [[ $REPO_BRANCH == master ]] && rm -rf package/kernel/rt*
-        ;;
-    "r1-plus-lts"|"r1-plus"|"r4s"|"r2c"|"r2s")
-        FIRMWARE_TYPE="sysupgrade"
-        [[ -n $DEFAULT_IP ]] && \
-        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
-        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        _packages "
-        luci-app-dockerman
-        luci-app-turboacc
-        luci-app-qbittorrent
-        luci-app-passwall2
-        luci-app-netdata
-        luci-app-cpufreq
-        luci-app-adguardhome
-        #luci-app-amule
-        luci-app-deluge
-        #luci-app-smartdns
-        #luci-app-adbyby-plus
-        luci-app-unblockneteasemusic
-        #htop lscpu lsscsi #nano screen #zstd pv ethtool
-        "
-        [[ "${REPO_BRANCH#*-}" =~ ^2 ]] && sed -i '/bridge/d' .config
-        wget -qO package/base-files/files/bin/bpm git.io/bpm && chmod +x package/base-files/files/bin/bpm
-        wget -qO package/base-files/files/bin/ansi git.io/ansi && chmod +x package/base-files/files/bin/ansi
-        _packages "kmod-rt2800-usb kmod-rtl8187 kmod-rtl8812au-ac kmod-rtl8812au-ct kmod-rtl8821ae
-        kmod-rtl8821cu ethtool kmod-usb-wdm kmod-usb2 kmod-usb-ohci kmod-usb-uhci kmod-mt76x2u kmod-mt76x0u
-        kmod-gpu-lima luci-app-cpufreq luci-app-pushbot luci-app-wrtbwmon luci-app-vssr"
-        echo -e "CONFIG_DRIVER_11AC_SUPPORT=y\nCONFIG_DRIVER_11N_SUPPORT=y\nCONFIG_DRIVER_11W_SUPPORT=y" >>.config
-        [[ $TARGET_DEVICE =~ r1-plus-lts ]] && sed -i "/lan_wan/s/'.*' '.*'/'eth0' 'eth1'/" target/*/rockchip/*/*/*/*/02_network
-        ;;
-    "newifi-d2")
-        FIRMWARE_TYPE="sysupgrade"
-        [[ -n $DEFAULT_IP ]] && \
-        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
-        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        ;;
-    "phicomm_k2p")
-        FIRMWARE_TYPE="sysupgrade"
-        [[ -n $DEFAULT_IP ]] && \
-        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
-        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        _packages "luci-app-wifischedule"
-        sed -i '/diskman/d;/autom/d;/ikoolproxy/d;/autos/d' .config
-        ;;
-    "asus_rt-n16")
-        FIRMWARE_TYPE="n16"
-        [[ -n $DEFAULT_IP ]] && \
-        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
-        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        ;;
-    "armvirt-64-default")
-        FIRMWARE_TYPE="$TARGET_DEVICE"
-        [[ -n $DEFAULT_IP ]] && \
-        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
-        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        echo "CONFIG_PERL_NOCOMMENT=y" >>.config
-        sed -i -E '/easymesh/d' .config
-        sed -i "s/default 160/default $PART_SIZE/" config/Config-images.in
-        sed -i 's/arm/arm||TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile
-        ;;
-esac
-
-[[ "$TARGET_DEVICE" =~ phicomm|newifi|asus ]] || {
+[[ "$TARGET_DEVICE" =! phicomm|newifi|asus ]] && {
     _packages "
     axel lscpu lsscsi patch diffutils htop lscpu
     brcmfmac-firmware-43430-sdio brcmfmac-firmware-43455-sdio kmod-brcmfmac
@@ -585,6 +496,95 @@ esac
         sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
     }
 }
+
+case "$TARGET_DEVICE" in
+    "x86_64")
+        FIRMWARE_TYPE="squashfs-combined"
+        [[ -n $DEFAULT_IP ]] && \
+        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
+        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        _packages "
+        luci-app-adbyby-plus
+        luci-app-adguardhome
+        luci-app-passwall2
+        #luci-app-amule
+        luci-app-dockerman
+        luci-app-netdata
+        luci-app-poweroff
+        luci-app-qbittorrent
+        #luci-app-smartdns
+        luci-app-ikoolproxy
+        luci-app-deluge
+        #luci-app-godproxy
+        #luci-app-frpc
+        luci-app-unblockneteasemusic
+        #AmuleWebUI-Reloaded htop lscpu lsscsi lsusb nano pciutils screen webui-aria2 zstd pv
+        #subversion-client #unixodbc #git-http
+        "
+        wget -qO package/base-files/files/bin/bpm git.io/bpm && chmod +x package/base-files/files/bin/bpm
+        wget -qO package/base-files/files/bin/ansi git.io/ansi && chmod +x package/base-files/files/bin/ansi
+        [[ $REPO_BRANCH == master ]] && rm -rf package/kernel/rt*
+        ;;
+    "r1-plus-lts"|"r1-plus"|"r4s"|"r2c"|"r2s")
+        FIRMWARE_TYPE="sysupgrade"
+        [[ -n $DEFAULT_IP ]] && \
+        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
+        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        _packages "
+        luci-app-dockerman
+        luci-app-turboacc
+        luci-app-qbittorrent
+        luci-app-passwall2
+        luci-app-netdata
+        luci-app-cpufreq
+        luci-app-adguardhome
+        #luci-app-amule
+        luci-app-deluge
+        #luci-app-smartdns
+        #luci-app-adbyby-plus
+        luci-app-unblockneteasemusic
+        #htop lscpu lsscsi #nano screen #zstd pv ethtool
+        "
+        [[ "${REPO_BRANCH#*-}" =~ ^2 ]] && sed -i '/bridge/d' .config
+        wget -qO package/base-files/files/bin/bpm git.io/bpm && chmod +x package/base-files/files/bin/bpm
+        wget -qO package/base-files/files/bin/ansi git.io/ansi && chmod +x package/base-files/files/bin/ansi
+        _packages "kmod-rt2800-usb kmod-rtl8187 kmod-rtl8812au-ac kmod-rtl8812au-ct kmod-rtl8821ae
+        kmod-rtl8821cu ethtool kmod-usb-wdm kmod-usb2 kmod-usb-ohci kmod-usb-uhci kmod-mt76x2u kmod-mt76x0u
+        kmod-gpu-lima luci-app-cpufreq luci-app-pushbot luci-app-wrtbwmon luci-app-vssr"
+        echo -e "CONFIG_DRIVER_11AC_SUPPORT=y\nCONFIG_DRIVER_11N_SUPPORT=y\nCONFIG_DRIVER_11W_SUPPORT=y" >>.config
+        [[ $TARGET_DEVICE =~ r1-plus-lts ]] && sed -i "/lan_wan/s/'.*' '.*'/'eth0' 'eth1'/" target/*/rockchip/*/*/*/*/02_network
+        ;;
+    "newifi-d2")
+        FIRMWARE_TYPE="sysupgrade"
+        [[ -n $DEFAULT_IP ]] && \
+        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
+        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        ;;
+    "phicomm_k2p")
+        FIRMWARE_TYPE="sysupgrade"
+        [[ -n $DEFAULT_IP ]] && \
+        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
+        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        _packages "luci-app-wifischedule"
+        sed -i '/diskman/d;/autom/d;/ikoolproxy/d;/autos/d' .config
+        ;;
+    "asus_rt-n16")
+        FIRMWARE_TYPE="n16"
+        [[ -n $DEFAULT_IP ]] && \
+        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
+        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        ;;
+    "armvirt-64-default")
+        FIRMWARE_TYPE="$TARGET_DEVICE"
+        [[ -n $DEFAULT_IP ]] && \
+        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
+        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        echo "CONFIG_PERL_NOCOMMENT=y" >>.config
+        sed -i -E '/easymesh/d' .config
+        sed -i "s/default 160/default $PART_SIZE/" config/Config-images.in
+        sed -i 's/arm/arm||TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile
+        ;;
+esac
 
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
 	cat <<-\EOF >>package/kernel/linux/modules/netfilter.mk
