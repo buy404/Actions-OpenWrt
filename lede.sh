@@ -370,7 +370,7 @@ cat >>.config <<-EOF
 	# CONFIG_PACKAGE_luci-app-xlnetacc is not set
 EOF
 
-[[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
+[[ "$REPO_BRANCH" =~ 18.06|master ]] || {
     _packages "
     luci-app-wizard
     luci-app-log-OpenWrt-19.07
