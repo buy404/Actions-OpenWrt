@@ -390,14 +390,6 @@ cat >>.config <<-EOF
 	# CONFIG_LUCI_CSSTIDY is not set #压缩 CSS 文件
 EOF
 
-_packages "
-luci-theme-argon
-luci-app-argon-config
-luci-app-zerotier
-"
-
-config_generate="package/base-files/files/bin/config_generate"
-wget -qO package/base-files/files/etc/banner git.io/JoNK8
 #sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
 #sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
 sed -i "s/ImmortalWrt/OpenWrt/g" {$config_generate,include/version.mk}
@@ -438,6 +430,9 @@ sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci 
     luci-app-uhttpd
     luci-app-control-webrestriction
     luci-app-cowbbonding
+    luci-theme-argon
+    luci-app-argon-config
+    luci-app-zerotier
     luci-app-alist
     luci-app-ddns-go
     luci-app-homeproxy
@@ -496,6 +491,9 @@ sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci 
         sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
     }
 }
+
+config_generate="package/base-files/files/bin/config_generate"
+wget -qO package/base-files/files/etc/banner git.io/JoNK8
 
 case "$TARGET_DEVICE" in
     "x86_64")
