@@ -430,12 +430,10 @@ fi
     done
 }
 
-echo -e '\nwww.nicept.net' | \
-tee -a $(find package/A/luci-* feeds/luci/applications/luci-* -type f -name "black.list" -o -name "proxy_host" 2>/dev/null | grep "ss") >/dev/null
+echo -e '\nwww.nicept.net' | tee -a $(find package/A/luci-* feeds/luci/applications/luci-* -type f -name "black.list" -o -name "proxy_host" 2>/dev/null | grep "ss") >/dev/null
 
 mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
-[[ -f $mwan3 ]] && grep -q "8.8" $mwan3 && \
-sed -i '/8.8/d' $mwan3
+[[ -f $mwan3 ]] && grep -q "8.8" $mwan3 && sed -i '/8.8/d' $mwan3
 
 # echo '<iframe src="https://ip.skk.moe/simple" style="width: 100%; border: 0"></iframe>' | \
 # tee -a {$(_find "package/ feeds/" "luci-app-vssr")/*/*/*/status_top.htm,$(_find "package/ feeds/" "luci-app-ssr-plus")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-bypass")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-passwall")/*/*/*/global/status.htm} >/dev/null
