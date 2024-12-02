@@ -534,7 +534,16 @@ fi
             sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
         fi
     done
-    _packages "luci-app-argon-config luci-theme-argon"
+    _packages "
+    luci-app-argon-config
+    luci-theme-argon
+    luci-app-alist
+    luci-app-ddns-go
+    luci-app-homeproxy
+    luci-app-mihomo
+    luci-app-mosdns
+    luci-app-smartdns
+    "
     sed -i 's/ariang/ariang +webui-aria2/g' feeds/*/*/luci-app-aria2/Makefile
 }
 
