@@ -370,27 +370,6 @@ cat >>.config <<-EOF
 	# CONFIG_PACKAGE_luci-app-xlnetacc is not set
 EOF
 
-_packages "
-luci-app-aria2
-luci-app-cifs-mount
-luci-app-commands
-luci-app-hd-idle
-luci-app-pushbot
-luci-app-eqos
-luci-app-softwarecenter
-luci-app-transmission
-luci-app-usb-printer
-luci-app-vssr
-luci-app-bypass
-luci-app-cupsd
-luci-app-adguardhome
-luci-app-openclash
-luci-app-weburl
-luci-app-wol
-luci-app-zerotier
-axel patch diffutils collectd-mod-ping collectd-mod-thermal wpad-wolfssl
-"
-
 [[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
     _packages "
     luci-app-wizard
@@ -411,15 +390,26 @@ if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
             }" $(find package/ -type f -name "*default-settings" 2>/dev/null)
 fi
 
-[[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ]] && {
-    for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
-        if grep -q "Kernel Version" $d; then
-            sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
-            sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
-            sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
-        fi
-    done
+[[ "$TARGET_DEVICE" =~ phicomm|newifi|asus ]] || {
     _packages "
+    luci-app-aria2
+    luci-app-cifs-mount
+    luci-app-commands
+    luci-app-hd-idle
+    luci-app-pushbot
+    luci-app-eqos
+    luci-app-softwarecenter
+    luci-app-transmission
+    luci-app-usb-printer
+    luci-app-vssr
+    luci-app-bypass
+    luci-app-cupsd
+    luci-app-adguardhome
+    luci-app-openclash
+    luci-app-weburl
+    luci-app-wol
+    luci-app-zerotier
+    axel patch diffutils collectd-mod-ping collectd-mod-thermal wpad-wolfssl
     luci-app-argon-config
     luci-theme-argon
     luci-app-alist
@@ -430,7 +420,57 @@ fi
     luci-app-smartdns
     "
     sed -i 's/ariang/ariang +webui-aria2/g' feeds/*/*/luci-app-aria2/Makefile
+
+    for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
+        if grep -q "Kernel Version" $d; then
+            sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
+            sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
+            sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
+        fi
+    done
 }
+
+echo -e '\nwww.nicept.net' | \
+tee -a $(find package/A/luci-* feeds/luci/applications/luci-* -type f -name "black.list" -o -name "proxy_host" 2>/dev/null | grep "ss") >/dev/null
+
+mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
+[[ -f $mwan3 ]] && grep -q "8.8" $mwan3 && \
+sed -i '/8.8/d' $mwan3
+
+# echo '<iframe src="https://ip.skk.moe/simple" style="width: 100%; border: 0"></iframe>' | \
+# tee -a {$(_find "package/ feeds/" "luci-app-vssr")/*/*/*/status_top.htm,$(_find "package/ feeds/" "luci-app-ssr-plus")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-bypass")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-passwall")/*/*/*/global/status.htm} >/dev/null
+xb=$(_find "package/ feeds/" "luci-app-bypass")
+[[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
+xc=$(_find "package/ feeds/" "qBittorrent-static")
+qBittorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
+libtorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
+[[ -d $xc ]] && [[ $qBittorrent_version ]] && sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
+xd=$(_find "package/ feeds/" "luci-app-turboacc")
+[[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
+xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
+[[ -d $xe ]] && sed -i '/echo .*root/ s/echo /[ $time =~ [0-9]+ ] \&\& echo /' $xe/root/etc/init.d/koolproxy
+xg=$(_find "package/ feeds/" "luci-app-pushbot")
+[[ -d $xg ]] && {
+    sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
+    sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
+}
+
+trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
+[[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
+raw.githubusercontent.com/hong0980/diy/master/files/transmission/tr$trv.patch 1>/dev/null 2>&1
+
+cat <<-\EOF >feeds/packages/lang/python/python3/files/python3-package-uuid.mk
+define Package/python3-uuid
+$(call Package/python3/Default)
+TITLE:=Python $(PYTHON3_VERSION) UUID module
+DEPENDS:=+python3-light +libuuid
+endef
+
+$(eval $(call Py3BasePackage,python3-uuid, \
+/usr/lib/python$(PYTHON3_VERSION)/uuid.py \
+/usr/lib/python$(PYTHON3_VERSION)/lib-dynload/_uuid.$(PYTHON3_SO_SUFFIX) \
+))
+EOF
 
 config_generate="package/base-files/files/bin/config_generate"
 wget -qO package/base-files/files/etc/banner git.io/JoNK8
@@ -546,48 +586,6 @@ case "$TARGET_DEVICE" in
         }
         ;;
 esac
-
-echo -e '\nwww.nicept.net' | \
-tee -a $(find package/A/luci-* feeds/luci/applications/luci-* -type f -name "black.list" -o -name "proxy_host" 2>/dev/null | grep "ss") >/dev/null
-
-mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
-[[ -f $mwan3 ]] && grep -q "8.8" $mwan3 && \
-sed -i '/8.8/d' $mwan3
-
-# echo '<iframe src="https://ip.skk.moe/simple" style="width: 100%; border: 0"></iframe>' | \
-# tee -a {$(_find "package/ feeds/" "luci-app-vssr")/*/*/*/status_top.htm,$(_find "package/ feeds/" "luci-app-ssr-plus")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-bypass")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-passwall")/*/*/*/global/status.htm} >/dev/null
-xb=$(_find "package/ feeds/" "luci-app-bypass")
-[[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
-xc=$(_find "package/ feeds/" "qBittorrent-static")
-qBittorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
-libtorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
-[[ -d $xc ]] && [[ $qBittorrent_version ]] && sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
-xd=$(_find "package/ feeds/" "luci-app-turboacc")
-[[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
-xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
-[[ -d $xe ]] && sed -i '/echo .*root/ s/echo /[ $time =~ [0-9]+ ] \&\& echo /' $xe/root/etc/init.d/koolproxy
-xg=$(_find "package/ feeds/" "luci-app-pushbot")
-[[ -d $xg ]] && {
-    sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
-    sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
-}
-
-trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
-[[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
-raw.githubusercontent.com/hong0980/diy/master/files/transmission/tr$trv.patch 1>/dev/null 2>&1
-
-cat <<-\EOF >feeds/packages/lang/python/python3/files/python3-package-uuid.mk
-define Package/python3-uuid
-$(call Package/python3/Default)
-TITLE:=Python $(PYTHON3_VERSION) UUID module
-DEPENDS:=+python3-light +libuuid
-endef
-
-$(eval $(call Py3BasePackage,python3-uuid, \
-/usr/lib/python$(PYTHON3_VERSION)/uuid.py \
-/usr/lib/python$(PYTHON3_VERSION)/lib-dynload/_uuid.$(PYTHON3_SO_SUFFIX) \
-))
-EOF
 
 sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' $(_find "package/ feeds/" "luci-app-passwall")/Makefile
 sed -i '/bridged/d; /deluge/d; /transmission/d' .config
