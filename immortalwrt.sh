@@ -303,17 +303,17 @@ color cy "添加&替换插件"
 clone_all https://github.com/hong0980/build
 clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
+clone_all https://github.com/xiaorouji/openwrt-passwall
+clone_all https://github.com/xiaorouji/openwrt-passwall2
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
-clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
-clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
+
 clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static bandwidthd
 clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm luci-app-bypass luci-app-store luci-app-pushbot taskd
 git_clone https://github.com/sbwml/packages_lang_golang golang
 git_clone https://github.com/ilxp/luci-app-ikoolproxy
 git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
-clone_all https://github.com/destan19/OpenAppFilter
-rm -rf feeds/*/*/luci-app-appfilter
+clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app-appfilter
 
 [[ ! "$REPO_BRANCH" =~ 18.06 ]] && {
     git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
@@ -388,13 +388,6 @@ cat >>.config <<-EOF
 	# CONFIG_LUCI_CSSTIDY is not set #压缩 CSS 文件
 EOF
 
-_packages "
-luci-theme-argon
-luci-app-argon-config
-"
-
-config_generate="package/base-files/files/bin/config_generate"
-wget -qO package/base-files/files/etc/banner git.io/JoNK8
 # sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
 sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
 sed -i "s/ImmortalWrt/OpenWrt/g" {$config_generate,include/version.mk}
@@ -435,6 +428,8 @@ sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci 
     luci-app-uhttpd
     luci-app-control-webrestriction
     luci-app-cowbbonding
+    luci-theme-argon
+    luci-app-argon-config
     "
     trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
     [[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
@@ -487,6 +482,9 @@ sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci 
         sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
     }
 }
+
+config_generate="package/base-files/files/bin/config_generate"
+wget -qO package/base-files/files/etc/banner git.io/JoNK8
 
 case "$TARGET_DEVICE" in
     "x86_64")

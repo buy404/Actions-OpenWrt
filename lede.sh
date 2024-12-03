@@ -292,6 +292,10 @@ color cy "添加&替换插件"
 clone_all https://github.com/hong0980/build
 clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
+clone_all https://github.com/xiaorouji/openwrt-passwall
+clone_all https://github.com/xiaorouji/openwrt-passwall2
+clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
+# clone_dir https://github.com/sbwml/openwrt_helloworld xray-core v2ray-core v2ray-geodata sing-box
 
 [[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
     clone_all https://github.com/sbwml/luci-app-mosdns
@@ -311,13 +315,9 @@ clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 
 [ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
     git_clone https://github.com/zzsj0928/luci-app-pushbot
-    git_clone https://github.com/yaof2/luci-app-ikoolproxy
+    git_clone https://github.com/ilxp/luci-app-ikoolproxy
     clone_all https://github.com/destan19/OpenAppFilter
-    # clone_dir https://github.com/sbwml/openwrt_helloworld xray-core v2ray-core v2ray-geodata sing-box
-    clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
     clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
-    clone_dir https://github.com/xiaorouji/openwrt-passwall luci-app-passwall
-    clone_dir https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
     clone_dir https://github.com/kiddin9/kwrt-packages luci-app-adguardhome adguardhome luci-app-bypass lua-neturl cpulimit
     clone_all https://github.com/brvphoenix/wrtbwmon
     git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
@@ -331,6 +331,8 @@ config
 cat >>.config <<-EOF
 	CONFIG_KERNEL_BUILD_USER="buy404"
 	CONFIG_KERNEL_BUILD_DOMAIN="OpenWrt"
+    CONFIG_PACKAGE_automount=y
+    CONFIG_PACKAGE_autosamba=y
 	CONFIG_PACKAGE_luci-app-accesscontrol=y
 	CONFIG_PACKAGE_luci-app-bridge=y
 	CONFIG_PACKAGE_luci-app-cowb-speedlimit=y
@@ -350,8 +352,6 @@ cat >>.config <<-EOF
 	CONFIG_PACKAGE_luci-app-ikoolproxy=y
 	CONFIG_PACKAGE_luci-app-simplenetwork=y
 	CONFIG_PACKAGE_luci-app-opkg=y
-	CONFIG_PACKAGE_automount=y
-	CONFIG_PACKAGE_autosamba=y
 	CONFIG_PACKAGE_luci-app-diskman=y
 	CONFIG_PACKAGE_luci-app-syncdial=y
 	CONFIG_PACKAGE_luci-theme-bootstrap=y
@@ -368,26 +368,6 @@ cat >>.config <<-EOF
 	# CONFIG_PACKAGE_luci-app-xlnetacc is not set
 	# CONFIG_PACKAGE_luci-app-uugamebooster is not set
 EOF
-
-_packages "
-luci-app-aria2
-luci-app-cifs-mount
-luci-app-commands
-luci-app-hd-idle
-luci-app-pushbot
-luci-app-eqos
-luci-app-softwarecenter
-luci-app-transmission
-luci-app-usb-printer
-luci-app-vssr
-luci-app-bypass
-luci-app-cupsd
-#luci-app-adguardhome
-luci-app-openclash
-luci-app-weburl
-luci-app-wol
-axel patch diffutils collectd-mod-ping collectd-mod-thermal wpad-wolfssl
-"
 
 [[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
     _packages "
@@ -410,6 +390,27 @@ if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
 fi
 
 [ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
+    _packages "
+    luci-app-aria2
+    luci-app-cifs-mount
+    luci-app-commands
+    luci-app-hd-idle
+    luci-app-pushbot
+    luci-app-eqos
+    luci-app-softwarecenter
+    luci-app-transmission
+    luci-app-usb-printer
+    luci-app-vssr
+    luci-app-bypass
+    luci-app-cupsd
+    #luci-app-adguardhome
+    luci-app-openclash
+    luci-app-weburl
+    luci-app-wol
+    axel patch diffutils collectd-mod-ping collectd-mod-thermal wpad-wolfssl
+    luci-app-argon-config
+    luci-theme-argon
+    "
     for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
         if grep -q "Kernel Version" $d; then
             sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
@@ -417,7 +418,6 @@ fi
             sed -i 's| <%=luci.sys.exec("cat /etc/bench.log") or ""%>||' $d
         fi
     done
-    _packages "luci-app-argon-config luci-theme-argon"
     sed -i 's/ariang/ariang +webui-aria2/g' feeds/*/*/luci-app-aria2/Makefile
 }
 
