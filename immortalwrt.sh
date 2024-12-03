@@ -388,13 +388,105 @@ cat >>.config <<-EOF
 	# CONFIG_LUCI_CSSTIDY is not set #压缩 CSS 文件
 EOF
 
+_packages "
+luci-theme-argon
+luci-app-argon-config
+"
+
 config_generate="package/base-files/files/bin/config_generate"
 wget -qO package/base-files/files/etc/banner git.io/JoNK8
-sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
+# sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
 sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
 sed -i "s/ImmortalWrt/OpenWrt/g" {$config_generate,include/version.mk}
 sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
 sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
+
+[[ "$TARGET_DEVICE" =~ phicomm|newifi|asus ]] || {
+    _packages "
+    axel lscpu lsscsi patch diffutils htop lscpu
+    brcmfmac-firmware-43430-sdio brcmfmac-firmware-43455-sdio kmod-brcmfmac
+    kmod-brcmutil kmod-mt7601u kmod-mt76x0u kmod-mt76x2u kmod-r8125
+    kmod-rt2500-usb kmod-rt2800-usb kmod-rtl8187 kmod-rtl8723bs
+    kmod-rtl8723au kmod-rtl8723bu kmod-rtl8812au-ac kmod-rtl8812au-ct
+    kmod-rtl8821ae kmod-rtl8821cu kmod-rtl8xxxu kmod-usb-net-asix-ax88179
+    kmod-usb-net-rtl8150 kmod-usb-net-rtl8152 mt7601u-firmware #rtl8188eu-firmware #kmod-rtl8188eu
+    rtl8723au-firmware rtl8723bu-firmware rtl8821ae-firmware
+    luci-app-aria2
+    luci-app-bypass
+    #luci-app-cifs-mount
+    luci-app-commands
+    luci-app-hd-idle
+    luci-app-cupsd
+    luci-app-openclash
+    luci-app-pushbot
+    luci-app-softwarecenter
+    #luci-app-syncdial
+    #luci-app-transmission
+    luci-app-usb-printer
+    luci-app-vssr
+    luci-app-wol
+    #luci-app-bandwidthd
+    luci-app-store
+    luci-app-log
+    #luci-app-alist
+    luci-app-weburl
+    luci-app-wrtbwmon
+    luci-app-pwdHackDeny
+    luci-app-uhttpd
+    luci-app-control-webrestriction
+    luci-app-cowbbonding
+    "
+    trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
+    [[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
+    raw.githubusercontent.com/hong0980/diy/master/files/transmission/tr$trv.patch
+
+    cat <<-\EOF >feeds/packages/lang/python/python3/files/python3-package-uuid.mk
+    define Package/python3-uuid
+    $(call Package/python3/Default)
+    TITLE:=Python $(PYTHON3_VERSION) UUID module
+    DEPENDS:=+python3-light +libuuid
+    endef
+
+    $(eval $(call Py3BasePackage,python3-uuid, \
+    /usr/lib/python$(PYTHON3_VERSION)/uuid.py \
+    /usr/lib/python$(PYTHON3_VERSION)/lib-dynload/_uuid.$(PYTHON3_SO_SUFFIX) \
+    ))
+    EOF
+
+    mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
+    grep -q "8.8" $mwan3 && sed -i '/8.8/d' $mwan3
+
+    grep -q "rblibtorrent" package/A/qBittorrent/Makefile && \
+    sed -i 's/+rblibtorrent/+libtorrent-rasterbar/' package/A/qBittorrent/Makefile
+
+    [[ "$REPO_BRANCH" =~ 2.*0 ]] && {
+        sed -i 's/^ping/-- ping/g' package/*/*/*/*/*/bridge.lua
+    } || {
+        for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
+            if grep -q "Kernel Version" $d; then
+                sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
+                sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
+                # sed -i '/<%+footer%>/i<fieldset class="cbi-section">\n\t<legend><%:天气%></legend>\n\t<table width="100%" cellspacing="10">\n\t\t<tr><td width="10%"><%:本地天气%></td><td > <iframe width="900" height="120" frameborder="0" scrolling="no" hspace="0" src="//i.tianqi.com/?c=code&a=getcode&id=22&py=xiaoshan&icon=1"></iframe>\n\t\t<tr><td width="10%"><%:柯桥天气%></td><td > <iframe width="900" height="120" frameborder="0" scrolling="no" hspace="0" src="//i.tianqi.com/?c=code&a=getcode&id=22&py=keqiaoqv&icon=1"></iframe>\n\t\t<tr><td width="10%"><%:指数%></td><td > <iframe width="400" height="270" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=27&py=xiaoshan&icon=1"></iframe><iframe width="400" height="270" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=27&py=keqiaoqv&icon=1"></iframe>\n\t</table>\n</fieldset>\n' $d
+            fi
+        done
+    }
+
+    xb=$(_find "package/ feeds/" "luci-app-bypass")
+    [[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
+    qBittorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
+    libtorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
+    xc=$(_find "package/ feeds/" "qBittorrent-static")
+    [[ -d $xc ]] && sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
+    xd=$(_find "package/ feeds/" "luci-app-turboacc")
+    [[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
+    xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
+    [[ -f $xe/luasrc/model/cbi/koolproxy/basic.lua ]] && sed -i '/^local.*sys.exec/ s/$/ or 0/g; /^local.*sys.exec/ s/.txt/.txt 2>\/dev\/null/g' $xe/luasrc/model/cbi/koolproxy/basic.lua
+    xg=$(_find "package/ feeds/" "luci-app-pushbot")
+    [[ -d $xg ]] && {
+        sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
+        sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
+    }
+}
 
 case "$TARGET_DEVICE" in
     "x86_64")
@@ -485,98 +577,6 @@ case "$TARGET_DEVICE" in
         ;;
 esac
 
-[[ "$TARGET_DEVICE" =~ phicomm|newifi|asus ]] || {
-    _packages "
-    axel lscpu lsscsi patch diffutils htop lscpu
-    brcmfmac-firmware-43430-sdio brcmfmac-firmware-43455-sdio kmod-brcmfmac
-    kmod-brcmutil kmod-mt7601u kmod-mt76x0u kmod-mt76x2u kmod-r8125
-    kmod-rt2500-usb kmod-rt2800-usb kmod-rtl8187 kmod-rtl8723bs
-    kmod-rtl8723au kmod-rtl8723bu kmod-rtl8812au-ac kmod-rtl8812au-ct
-    kmod-rtl8821ae kmod-rtl8821cu kmod-rtl8xxxu kmod-usb-net-asix-ax88179
-    kmod-usb-net-rtl8150 kmod-usb-net-rtl8152 mt7601u-firmware #rtl8188eu-firmware #kmod-rtl8188eu
-    rtl8723au-firmware rtl8723bu-firmware rtl8821ae-firmware
-    luci-app-aria2
-    luci-app-bypass
-    #luci-app-cifs-mount
-    luci-app-commands
-    luci-app-hd-idle
-    luci-app-cupsd
-    luci-app-openclash
-    luci-app-pushbot
-    luci-app-softwarecenter
-    #luci-app-syncdial
-    #luci-app-transmission
-    luci-app-usb-printer
-    luci-app-vssr
-    luci-app-wol
-    #luci-app-bandwidthd
-    luci-app-store
-    luci-app-log
-    #luci-app-alist
-    luci-app-weburl
-    luci-app-wrtbwmon
-    luci-app-pwdHackDeny
-    luci-app-uhttpd
-    luci-app-control-webrestriction
-    luci-app-cowbbonding
-    "
-    trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
-    [[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
-    raw.githubusercontent.com/hong0980/diy/master/files/transmission/tr$trv.patch
-
-	cat <<-\EOF >feeds/packages/lang/python/python3/files/python3-package-uuid.mk
-	define Package/python3-uuid
-	$(call Package/python3/Default)
-	TITLE:=Python $(PYTHON3_VERSION) UUID module
-	DEPENDS:=+python3-light +libuuid
-	endef
-
-	$(eval $(call Py3BasePackage,python3-uuid, \
-	/usr/lib/python$(PYTHON3_VERSION)/uuid.py \
-	/usr/lib/python$(PYTHON3_VERSION)/lib-dynload/_uuid.$(PYTHON3_SO_SUFFIX) \
-	))
-	EOF
-
-    mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
-    grep -q "8.8" $mwan3 && sed -i '/8.8/d' $mwan3
-
-    grep -q "rblibtorrent" package/A/qBittorrent/Makefile && \
-    sed -i 's/+rblibtorrent/+libtorrent-rasterbar/' package/A/qBittorrent/Makefile
-
-    [[ "$REPO_BRANCH" =~ 2.*0 ]] && {
-        sed -i 's/^ping/-- ping/g' package/*/*/*/*/*/bridge.lua
-    } || {
-        _packages "luci-app-argon-config"
-        sed -i "s/argonv3/argon/" feeds/luci/applications/luci-app-argon-config/Makefile
-        for d in $(find feeds/ package/ -type f -name "index.htm" 2>/dev/null); do
-            if grep -q "Kernel Version" $d; then
-                sed -i 's|os.date(.*|os.date("%F %X") .. " " .. translate(os.date("%A")),|' $d
-                sed -i '/<%+footer%>/i<%-\n\tlocal incdir = util.libpath() .. "/view/admin_status/index/"\n\tif fs.access(incdir) then\n\t\tlocal inc\n\t\tfor inc in fs.dir(incdir) do\n\t\t\tif inc:match("%.htm$") then\n\t\t\t\tinclude("admin_status/index/" .. inc:gsub("%.htm$", ""))\n\t\t\tend\n\t\tend\n\t\end\n-%>\n' $d
-                # sed -i '/<%+footer%>/i<fieldset class="cbi-section">\n\t<legend><%:天气%></legend>\n\t<table width="100%" cellspacing="10">\n\t\t<tr><td width="10%"><%:本地天气%></td><td > <iframe width="900" height="120" frameborder="0" scrolling="no" hspace="0" src="//i.tianqi.com/?c=code&a=getcode&id=22&py=xiaoshan&icon=1"></iframe>\n\t\t<tr><td width="10%"><%:柯桥天气%></td><td > <iframe width="900" height="120" frameborder="0" scrolling="no" hspace="0" src="//i.tianqi.com/?c=code&a=getcode&id=22&py=keqiaoqv&icon=1"></iframe>\n\t\t<tr><td width="10%"><%:指数%></td><td > <iframe width="400" height="270" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=27&py=xiaoshan&icon=1"></iframe><iframe width="400" height="270" frameborder="0" scrolling="no" hspace="0" src="https://i.tianqi.com/?c=code&a=getcode&id=27&py=keqiaoqv&icon=1"></iframe>\n\t</table>\n</fieldset>\n' $d
-            fi
-        done
-    }
-
-    xb=$(_find "package/ feeds/" "luci-app-bypass")
-    [[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
-    qBittorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
-    libtorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
-    xc=$(_find "package/ feeds/" "qBittorrent-static")
-    [[ -d $xc ]] && {
-        sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
-    }
-    xd=$(_find "package/ feeds/" "luci-app-turboacc")
-    [[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
-    xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
-    [[ -f $xe/luasrc/model/cbi/koolproxy/basic.lua ]] && sed -i \
-        '/^local.*sys.exec/ s/$/ or 0/g; /^local.*sys.exec/ s/.txt/.txt 2>\/dev\/null/g' $xe/luasrc/model/cbi/koolproxy/basic.lua
-    xg=$(_find "package/ feeds/" "luci-app-pushbot")
-    [[ -d $xg ]] && {
-        sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
-        sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
-    }
-}
-
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
 	cat <<-\EOF >>package/kernel/linux/modules/netfilter.mk
 	define KernelPackage/nft-tproxy
@@ -661,7 +661,7 @@ cat >organize.sh<<-EOF
 EOF
 status
 
-[[ $KERNEL_TARGET ]] && {
+[[ $CLASH_KERNEL = 'true' && $KERNEL_TARGET ]] && {
     STEP_NAME='下载openchash运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
     [[ -d files/etc/openclash/core ]] || mkdir -p files/etc/openclash/core
     CLASH_META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-$KERNEL_TARGET.tar.gz"
@@ -698,7 +698,7 @@ status
     status
 }
 
-[[ $KERNEL_TARGET ]] && {
+[[ $CLASH_KERNEL = 'true' && $KERNEL_TARGET ]] && {
     STEP_NAME='下载adguardhome运行内核'; BEGIN_TIME=$(date '+%H:%M:%S')
     [[ -d files/usr/bin/AdGuardHome ]] || mkdir -p files/usr/bin/AdGuardHome
     AGH_CORE="https://github.com/AdguardTeam/AdGuardHome/releases/latest/download/AdGuardHome_linux_$KERNEL_TARGET.tar.gz"
