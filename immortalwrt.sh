@@ -228,7 +228,7 @@ config () {
 				EOF
 			fi
 			;;
-		"armvirt-64-default")
+		"armvirt-64")
 			if [[ "$REPO_BRANCH" =~ 21.02|18.06 ]]; then
 				cat >.config<<-EOF
 				CONFIG_TARGET_armvirt=y
@@ -564,7 +564,7 @@ case "$TARGET_DEVICE" in
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
         ;;
-    "armvirt-64-default")
+    "armvirt-64")
         FIRMWARE_TYPE="$TARGET_DEVICE"
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
