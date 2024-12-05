@@ -548,7 +548,7 @@ case "$TARGET_DEVICE" in
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
         ;;
     "armvirt-64-default")
-        FIRMWARE_TYPE="$TARGET_DEVICE"
+        FIRMWARE_TYPE="armvirt-64"
         sed -i '/easymesh/d' .config
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
