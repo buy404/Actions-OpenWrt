@@ -316,18 +316,6 @@ git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
 clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app-appfilter
 clone_all https://github.com/linkease/istore luci
 
-[[ ! "$REPO_BRANCH" =~ 18.06 ]] && {
-	clone_dir openwrt-23.05 https://github.com/coolsnowwolf/luci luci-app-adguardhome
-    clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
-    clone_all https://github.com/brvphoenix/wrtbwmon
-    clone_all https://github.com/sbwml/luci-app-mosdns
-    clone_all https://github.com/sbwml/luci-app-alist
-    git_clone https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
-    git_clone https://github.com/kiddin9/luci-theme-edge
-    git_clone https://github.com/jerrykuku/luci-theme-argon
-    git_clone https://github.com/jerrykuku/luci-app-argon-config
-}
-
 [[ "$REPO_BRANCH" =~ 18.06 ]] && {
     clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
     clone_all lua https://github.com/sbwml/luci-app-alist
@@ -343,9 +331,16 @@ clone_all https://github.com/linkease/istore luci
     clone_dir https://github.com/haiibo/packages luci-theme-opentomcat
 }
 
-[[ ! "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
-    git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
-    clone_all https://github.com/morytyann/OpenWrt-mihomo
+[[ ! "$REPO_BRANCH" =~ 18.06 ]] && {
+    clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
+    clone_all https://github.com/brvphoenix/wrtbwmon
+    clone_all https://github.com/sbwml/luci-app-mosdns
+    clone_all https://github.com/sbwml/luci-app-alist
+    git_clone https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
+    git_clone https://github.com/kiddin9/luci-theme-edge
+    git_clone https://github.com/jerrykuku/luci-theme-argon
+    git_clone https://github.com/jerrykuku/luci-app-argon-config
+    clone_dir openwrt-23.05 https://github.com/coolsnowwolf/luci luci-app-adguardhome
 }
 
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
@@ -357,6 +352,11 @@ clone_all https://github.com/linkease/istore luci
     clone_dir openwrt-23.05 https://github.com/immortalwrt/packages samba4 nginx-util htop pciutils libwebsockets gawk mwan3 \
         lua-openssl smartdns bluez curl #miniupnpc miniupnpd
     clone_dir openwrt-23.05 https://github.com/immortalwrt/luci luci-app-syncdial luci-app-mwan3
+}
+
+[[ ! "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
+    git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
+    clone_all https://github.com/morytyann/OpenWrt-mihomo
 }
 
 [[ "$TARGET_DEVICE" =~ armvirt-64 ]] && clone_all https://github.com/ophub/luci-app-amlogic

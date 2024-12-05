@@ -297,14 +297,6 @@ clone_all https://github.com/xiaorouji/openwrt-passwall2
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 # clone_dir https://github.com/sbwml/openwrt_helloworld xray-core v2ray-core v2ray-geodata sing-box
 
-[[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
-    clone_all https://github.com/sbwml/luci-app-mosdns
-    clone_all https://github.com/sbwml/luci-app-alist
-    git_clone https://github.com/kiddin9/luci-theme-edge
-    git_clone https://github.com/jerrykuku/luci-theme-argon
-    git_clone https://github.com/jerrykuku/luci-app-argon-config
-}
-
 [[ "$REPO_BRANCH" =~ 18.06|master ]] && {
     clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
     clone_all lua https://github.com/sbwml/luci-app-alist
@@ -317,6 +309,14 @@ clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
     git_clone https://github.com/ximiTech/msd_lite
     clone_dir https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom luci-theme-infinityfreedom-ng
     clone_dir https://github.com/haiibo/packages luci-theme-opentomcat
+}
+
+[[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
+    clone_all https://github.com/sbwml/luci-app-mosdns
+    clone_all https://github.com/sbwml/luci-app-alist
+    git_clone https://github.com/kiddin9/luci-theme-edge
+    git_clone https://github.com/jerrykuku/luci-theme-argon
+    git_clone https://github.com/jerrykuku/luci-app-argon-config
 }
 
 [ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
