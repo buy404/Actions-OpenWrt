@@ -566,7 +566,7 @@ case "$TARGET_DEVICE" in
         ;;
     "armvirt-64")
         if [[ "$REPO_BRANCH" =~ 21.02|18.06 ]]; then
-                FIRMWARE_TYPE="Default-rootfs"
+                FIRMWARE_TYPE="default-rootfs"
         else
                 FIRMWARE_TYPE="generic-rootfs"
         fi
