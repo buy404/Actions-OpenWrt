@@ -316,8 +316,6 @@ git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
 clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app-appfilter
 
 [[ ! "$REPO_BRANCH" =~ 18.06 ]] && {
-    git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
-    clone_all https://github.com/morytyann/OpenWrt-mihomo
     clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
     clone_all https://github.com/brvphoenix/wrtbwmon
     clone_all https://github.com/sbwml/luci-app-mosdns
@@ -335,6 +333,11 @@ clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app
     git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
     git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
     git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
+}
+
+[[ ! "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
+    git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
+    clone_all https://github.com/morytyann/OpenWrt-mihomo
 }
 
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
