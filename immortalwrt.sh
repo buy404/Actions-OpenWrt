@@ -566,9 +566,9 @@ case "$TARGET_DEVICE" in
         ;;
     "armvirt-64")
         if [[ "$REPO_BRANCH" =~ 21.02|18.06 ]]; then
-                FIRMWARE_TYPE="default-rootfs"
+            FIRMWARE_TYPE="default-rootfs"
         else
-                FIRMWARE_TYPE="generic-rootfs"
+            FIRMWARE_TYPE="generic-rootfs"
         fi
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
