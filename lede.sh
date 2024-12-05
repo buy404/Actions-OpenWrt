@@ -289,44 +289,41 @@ STEP_NAME='更新&安装插件'; BEGIN_TIME=$(date '+%H:%M:%S')
 status
 
 color cy "添加&替换插件"
+clone_all https://github.com/hong0980/build
 clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_all https://github.com/xiaorouji/openwrt-passwall
 clone_all https://github.com/xiaorouji/openwrt-passwall2
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
+# clone_dir https://github.com/sbwml/openwrt_helloworld xray-core v2ray-core v2ray-geodata sing-box
 
-clone_all https://github.com/hong0980/build
-clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
-clone_dir https://github.com/kiddin9/kwrt-packages luci-app-adguardhome adguardhome luci-app-bypass lua-neturl cpulimit
-clone_all https://github.com/destan19/OpenAppFilter
-clone_all https://github.com/brvphoenix/wrtbwmon
-clone_all https://github.com/linkease/istore luci
-clone_all https://github.com/ophub/luci-app-amlogic
-git_clone https://github.com/sbwml/packages_lang_golang golang
-git_clone https://github.com/zzsj0928/luci-app-pushbot
-git_clone https://github.com/yaof2/luci-app-ikoolproxy
-git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
-sed -i '/log_check/s/^/#/' $(_find "package/ feeds/" "luci-app-unblockneteasemusic")/root/etc/init.d/unblockneteasemusic
-
-if [[ "$REPO_BRANCH" =~ 18.06|master ]]; then
-    clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
-    clone_all lua https://github.com/sbwml/luci-app-alist
-    clone_all https://github.com/sirpdboy/luci-app-ddns-go
-    git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
-    git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
-    git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
-    git_clone https://github.com/ximiTech/luci-app-msd_lite
-    git_clone https://github.com/ximiTech/msd_lite
-    #git_clone https://github.com/kongfl888/luci-app-adguardhome
-    clone_dir https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom luci-theme-infinityfreedom-ng
-    clone_dir https://github.com/haiibo/packages luci-theme-opentomcat
-else
+[[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
     clone_all https://github.com/sbwml/luci-app-mosdns
     clone_all https://github.com/sbwml/luci-app-alist
     git_clone https://github.com/kiddin9/luci-theme-edge
     git_clone https://github.com/jerrykuku/luci-theme-argon
     git_clone https://github.com/jerrykuku/luci-app-argon-config
-fi
+}
+
+[[ "$REPO_BRANCH" =~ 18.06|master ]] && {
+    clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
+    clone_all lua https://github.com/sbwml/luci-app-alist
+    git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
+    git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
+    git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
+    git_clone https://github.com/kongfl888/luci-app-adguardhome
+}
+
+[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
+    git_clone https://github.com/zzsj0928/luci-app-pushbot
+    git_clone https://github.com/ilxp/luci-app-ikoolproxy
+    clone_all https://github.com/destan19/OpenAppFilter
+    clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
+    clone_dir https://github.com/kiddin9/kwrt-packages luci-app-bypass lua-neturl cpulimit
+    clone_all https://github.com/brvphoenix/wrtbwmon
+    git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
+    sed -i '/log_check/s/^/#/' $(_find "package/ feeds/" "luci-app-unblockneteasemusic")/root/etc/init.d/unblockneteasemusic
+}
 
 STEP_NAME='加载个人设置'; BEGIN_TIME=$(date '+%H:%M:%S')
 
@@ -335,6 +332,8 @@ config
 cat >>.config <<-EOF
 	CONFIG_KERNEL_BUILD_USER="buy404"
 	CONFIG_KERNEL_BUILD_DOMAIN="OpenWrt"
+	CONFIG_PACKAGE_automount=y
+	CONFIG_PACKAGE_autosamba=y
 	CONFIG_PACKAGE_luci-app-accesscontrol=y
 	CONFIG_PACKAGE_luci-app-bridge=y
 	CONFIG_PACKAGE_luci-app-cowb-speedlimit=y
@@ -354,20 +353,21 @@ cat >>.config <<-EOF
 	CONFIG_PACKAGE_luci-app-ikoolproxy=y
 	CONFIG_PACKAGE_luci-app-simplenetwork=y
 	CONFIG_PACKAGE_luci-app-opkg=y
-	CONFIG_PACKAGE_automount=y
-	CONFIG_PACKAGE_autosamba=y
 	CONFIG_PACKAGE_luci-app-diskman=y
 	CONFIG_PACKAGE_luci-app-syncdial=y
 	CONFIG_PACKAGE_luci-theme-bootstrap=y
 	CONFIG_PACKAGE_luci-app-tinynote=y
 	CONFIG_PACKAGE_luci-app-arpbind=y
 	CONFIG_PACKAGE_luci-app-wifischedule=y
+	# CONFIG_PACKAGE_luci-app-unblockmusic is not set
 	# CONFIG_PACKAGE_luci-app-wireguard is not set
 	# CONFIG_PACKAGE_luci-app-autoreboot is not set
 	# CONFIG_PACKAGE_luci-app-ddns is not set
 	# CONFIG_PACKAGE_luci-app-ssr-plus is not set
+	# CONFIG_PACKAGE_luci-app-zerotier is not set
 	# CONFIG_PACKAGE_luci-app-ipsec-vpnd is not set
 	# CONFIG_PACKAGE_luci-app-xlnetacc is not set
+	# CONFIG_PACKAGE_luci-app-uugamebooster is not set
 EOF
 
 [[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
@@ -377,9 +377,9 @@ EOF
     "
 }
 
-if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
+[[ $REPO_URL =~ "coolsnowwolf" ]] && {
     # sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
-    # sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
+    sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
     sed -i 's/option enabled.*/option enabled 1/' feeds/*/*/*/*/upnpd.config
     sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
     sed -i 's/UTC/UTC-8/' Makefile
@@ -388,7 +388,7 @@ if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
             s|zh_cn|zh_cn\nuci set luci.main.mediaurlbase=/luci-static/bootstrap|
             \$i sed -i 's/root::.*/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow\n[ -f '/bin/bash' ] && sed -i '/\\\/ash$/s/ash/bash/' /etc/passwd
             }" $(find package/ -type f -name "*default-settings" 2>/dev/null)
-fi
+}
 
 [ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
     _packages "
@@ -559,9 +559,13 @@ case "$TARGET_DEVICE" in
         kmod-fs-exfat kmod-fs-ext4 kmod-fs-vfat kmod-mac80211 kmod-rt2800-usb kmod-usb-net
         kmod-usb-net-asix-ax88179 kmod-usb-net-rtl8150 kmod-usb-net-rtl8152 kmod-usb-storage
         kmod-usb-storage-extras kmod-usb-storage-uas kmod-usb2 kmod-usb3 lm-sensors losetup
-        lsattr lsblk lscpu lsscsi luci-app-adguardhome luci-app-cpufreq luci-app-dockerman
-        luci-app-qbittorrent mkf2fs ntfs-3g parted pv python3 resize2fs tune2fs unzip
-        uuidgen wpa-cli wpad wpad-basic xfs-fsck xfs-mkf"
+        lsattr lsblk lscpu lsscsi mkf2fs ntfs-3g parted pv python3 resize2fs tune2fs unzip
+        uuidgen wpa-cli wpad wpad-basic xfs-fsck xfs-mkf
+        luci-app-adguardhome
+        luci-app-cpufreq
+        luci-app-dockerman
+        luci-app-qbittorrent
+        "
         # wget -qO feeds/luci/applications/luci-app-qbittorrent/Makefile https://raw.githubusercontent.com/immortalwrt/luci/openwrt-18.06/applications/luci-app-qbittorrent/Makefile
         # sed -i 's/-Enhanced-Edition//' feeds/luci/applications/luci-app-qbittorrent/Makefile
         sed -i 's/arm/arm||TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile

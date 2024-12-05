@@ -300,32 +300,22 @@ STEP_NAME='更新&安装插件'; BEGIN_TIME=$(date '+%H:%M:%S')
 status
 
 color cy "添加&替换插件"
+clone_all https://github.com/hong0980/build
 clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
-clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 clone_all https://github.com/xiaorouji/openwrt-passwall
 clone_all https://github.com/xiaorouji/openwrt-passwall2
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
+clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 
-clone_all https://github.com/hong0980/build
 clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static bandwidthd
-clone_dir https://github.com/kiddin9/kwrt-packages luci-app-bypass luci-app-pushbot
+clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm luci-app-bypass luci-app-store luci-app-pushbot taskd
 git_clone https://github.com/sbwml/packages_lang_golang golang
 git_clone https://github.com/ilxp/luci-app-ikoolproxy
 git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
-clone_all https://github.com/destan19/OpenAppFilter
-clone_all https://github.com/linkease/istore luci
-clone_all https://github.com/ophub/luci-app-amlogic
-rm -rf feeds/*/*/luci-app-appfilter
+clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app-appfilter
 
-if [[ "$REPO_BRANCH" =~ 18.06 ]]; then
-    clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
-    clone_all lua https://github.com/sbwml/luci-app-alist
-    git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
-    git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
-    git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
-    git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
-else
+[[ ! "$REPO_BRANCH" =~ 18.06 ]] && {
     git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
     clone_all https://github.com/morytyann/OpenWrt-mihomo
     clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
@@ -336,8 +326,16 @@ else
     git_clone https://github.com/kiddin9/luci-theme-edge
     git_clone https://github.com/jerrykuku/luci-theme-argon
     git_clone https://github.com/jerrykuku/luci-app-argon-config
-    #clone_dir openwrt-23.05 https://github.com/coolsnowwolf/luci luci-app-adguardhome
-fi
+}
+
+[[ "$REPO_BRANCH" =~ 18.06 ]] && {
+    clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
+    clone_all lua https://github.com/sbwml/luci-app-alist
+    git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
+    git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
+    git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
+    git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
+}
 
 [[ "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
     clone_dir https://github.com/immortalwrt/packages nghttp3 ngtcp2 bash
@@ -390,8 +388,8 @@ cat >>.config <<-EOF
 	# CONFIG_LUCI_CSSTIDY is not set #压缩 CSS 文件
 EOF
 
-#sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
-#sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
+# sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
+sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
 sed -i "s/ImmortalWrt/OpenWrt/g" {$config_generate,include/version.mk}
 sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
 sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci -q commit luci\nuci -q set upnpd.config.enabled=\"1\" && uci -q commit upnpd\nsed -i 's/root::.*:::/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow" $(find package/emortal/ -type f -regex '.*default-settings$')
@@ -428,11 +426,11 @@ sed -i "\$i uci -q set luci.main.mediaurlbase=\"/luci-static/bootstrap\" && uci 
     luci-app-wrtbwmon
     luci-app-pwdHackDeny
     luci-app-uhttpd
+    luci-app-zerotier
     luci-app-control-webrestriction
     luci-app-cowbbonding
     luci-theme-argon
     luci-app-argon-config
-    luci-app-zerotier
     "
     trv=$(awk -F= '/PKG_VERSION:/{print $2}' feeds/packages/net/transmission/Makefile)
     [[ $trv ]] && wget -qO feeds/packages/net/transmission/patches/tr$trv.patch \
@@ -497,7 +495,7 @@ case "$TARGET_DEVICE" in
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
         _packages "
         luci-app-adbyby-plus
-        luci-app-adguardhome
+        #luci-app-adguardhome
         luci-app-passwall2
         #luci-app-amule
         luci-app-dockerman
@@ -529,7 +527,7 @@ case "$TARGET_DEVICE" in
         luci-app-passwall2
         luci-app-netdata
         luci-app-cpufreq
-        luci-app-adguardhome
+        #luci-app-adguardhome
         #luci-app-amule
         luci-app-deluge
         #luci-app-smartdns
