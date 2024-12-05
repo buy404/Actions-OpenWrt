@@ -309,13 +309,15 @@ clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 clone_dir https://github.com/sbwml/openwrt_helloworld shadowsocks-rust
 
 clone_dir https://github.com/coolsnowwolf/packages qtbase qttools qBittorrent qBittorrent-static bandwidthd
-clone_dir https://github.com/kiddin9/kwrt-packages luci-lib-taskd luci-lib-xterm luci-app-bypass luci-app-store luci-app-pushbot taskd
+clone_dir https://github.com/kiddin9/kwrt-packages luci-app-bypass luci-app-pushbot
 git_clone https://github.com/sbwml/packages_lang_golang golang
 git_clone https://github.com/ilxp/luci-app-ikoolproxy
 git_clone https://github.com/AlexZhuo/luci-app-bandwidthd
 clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app-appfilter
+clone_all https://github.com/linkease/istore luci
 
 [[ ! "$REPO_BRANCH" =~ 18.06 ]] && {
+	clone_dir openwrt-23.05 https://github.com/coolsnowwolf/luci luci-app-adguardhome
     clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
     clone_all https://github.com/brvphoenix/wrtbwmon
     clone_all https://github.com/sbwml/luci-app-mosdns
@@ -333,6 +335,12 @@ clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app
     git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
     git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
     git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
+    git_clone https://github.com/kongfl888/luci-app-adguardhome
+    clone_all https://github.com/sirpdboy/luci-app-ddns-go
+    git_clone https://github.com/ximiTech/luci-app-msd_lite
+    git_clone https://github.com/ximiTech/msd_lite
+    clone_dir https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom luci-theme-infinityfreedom-ng
+    clone_dir https://github.com/haiibo/packages luci-theme-opentomcat
 }
 
 [[ ! "$REPO_BRANCH" =~ 21.02|18.06 ]] && {
@@ -350,6 +358,8 @@ clone_all https://github.com/destan19/OpenAppFilter && rm -rf feeds/*/*/luci-app
         lua-openssl smartdns bluez curl #miniupnpc miniupnpd
     clone_dir openwrt-23.05 https://github.com/immortalwrt/luci luci-app-syncdial luci-app-mwan3
 }
+
+[[ "$TARGET_DEVICE" =~ armvirt-64 ]] && clone_all https://github.com/ophub/luci-app-amlogic
 
 STEP_NAME='加载个人设置'; BEGIN_TIME=$(date '+%H:%M:%S')
 
