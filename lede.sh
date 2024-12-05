@@ -219,7 +219,7 @@ config() {
 			CONFIG_TARGET_bcm47xx_mips74k_DEVICE_asus_rt-n16=y
 			EOF
 			;;
-		"armvirt-64-default")
+		"armvirt-64")
 			cat >.config<<-EOF
 			CONFIG_TARGET_armvirt=y
 			CONFIG_TARGET_armvirt_64=y
@@ -547,8 +547,8 @@ case "$TARGET_DEVICE" in
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
         ;;
-    "armvirt-64-default")
-        FIRMWARE_TYPE="armvirt-64"
+    "armvirt-64")
+        FIRMWARE_TYPE="generic-rootfs"
         sed -i '/easymesh/d' .config
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
