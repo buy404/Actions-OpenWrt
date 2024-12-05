@@ -570,6 +570,15 @@ case "$TARGET_DEVICE" in
         else
             FIRMWARE_TYPE="generic-rootfs"
         fi
+        _packages "
+        perl perl-http-date perlbase-file perlbase-getopt perlbase-time perlbase-unicode
+        perlbase-utf8 blkid fdisk lsblk parted attr btrfs-progs chattr dosfstools e2fsprogs
+        f2fs-tools f2fsck lsattr mkf2fs xfs-fsck xfs-mkfs bsdtar pigz bash gawk getopt
+        losetup tar uuidgen acpid kmod-brcmfmac kmod-brcmutil kmod-cfg80211 kmod-mac80211
+        hostapd-common wpa-cli wpad-basic iw ntfs3-mount coreutils coreutils-base64 jq pv
+        coreutils-nohup
+        "
+        echo -e "CONFIG_BTRFS_PROGS_ZSTD=y\nCONFIG_BRCMFMAC_SDIO=y" >>.config
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
