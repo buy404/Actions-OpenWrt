@@ -536,19 +536,19 @@ case "$TARGET_DEVICE" in
         ;;
     "newifi-d2")
         FIRMWARE_TYPE="sysupgrade"
-        _packages "luci-app-easymesh"
-        _delpackage "ikoolproxy openclash transmission softwarecenter aria2 vssr adguardhome"
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        _packages "luci-app-easymesh"
+        _delpackage "ikoolproxy openclash transmission softwarecenter aria2 vssr adguardhome"
         ;;
     "phicomm_k2p")
         FIRMWARE_TYPE="sysupgrade"
-        _packages "luci-app-easymesh"
-        _delpackage "samba4 luci-app-usb-printer luci-app-cifs-mount diskman cupsd autosamba automount"
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        _packages "luci-app-easymesh"
+        _delpackage "samba4 luci-app-usb-printer luci-app-cifs-mount diskman cupsd autosamba automount"
         ;;
     "asus_rt-n16")
         FIRMWARE_TYPE="n16"
@@ -558,11 +558,11 @@ case "$TARGET_DEVICE" in
         ;;
     "armvirt-64")
         FIRMWARE_TYPE="generic-rootfs"
-        sed -i '/easymesh/d' .config
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        _packages "attr bash blkid brcmfmac-firmware-43430-sdio brcmfmac-firmware-43455-sdio
+        _packages "
+        attr bash blkid brcmfmac-firmware-43430-sdio brcmfmac-firmware-43455-sdio
         btrfs-progs cfdisk chattr curl dosfstools e2fsprogs f2fs-tools f2fsck fdisk getopt
         hostpad-common htop install-program iperf3 kmod-brcmfmac kmod-brcmutil kmod-cfg80211
         kmod-fs-exfat kmod-fs-ext4 kmod-fs-vfat kmod-mac80211 kmod-rt2800-usb kmod-usb-net
@@ -575,6 +575,7 @@ case "$TARGET_DEVICE" in
         luci-app-dockerman
         luci-app-qbittorrent
         "
+        sed -i '/easymesh/d' .config
         # wget -qO feeds/luci/applications/luci-app-qbittorrent/Makefile https://raw.githubusercontent.com/immortalwrt/luci/openwrt-18.06/applications/luci-app-qbittorrent/Makefile
         # sed -i 's/-Enhanced-Edition//' feeds/luci/applications/luci-app-qbittorrent/Makefile
         sed -i 's/arm/arm||TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile

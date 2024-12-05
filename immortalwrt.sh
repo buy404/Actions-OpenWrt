@@ -583,6 +583,9 @@ case "$TARGET_DEVICE" in
         else
             FIRMWARE_TYPE="generic-rootfs"
         fi
+        [[ -n $DEFAULT_IP ]] && \
+        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
+        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
         _packages "
         perl perl-http-date perlbase-file perlbase-getopt perlbase-time perlbase-unicode
         perlbase-utf8 blkid fdisk lsblk parted attr btrfs-progs chattr dosfstools e2fsprogs
@@ -592,9 +595,6 @@ case "$TARGET_DEVICE" in
         coreutils-nohup
         "
         echo -e "CONFIG_BTRFS_PROGS_ZSTD=y\nCONFIG_BRCMFMAC_SDIO=y" >>.config
-        [[ -n $DEFAULT_IP ]] && \
-        sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
-        sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
         echo "CONFIG_PERL_NOCOMMENT=y" >>.config
         sed -i -E '/easymesh/d' .config
         sed -i "s/default 160/default $PART_SIZE/" config/Config-images.in
