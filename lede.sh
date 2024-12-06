@@ -38,23 +38,23 @@ status() {
     fi
 }
 
-_find() {
+find_dir() {
     find $1 -maxdepth 3 -type d -name "$2" -print -quit 2>/dev/null
 }
 
-_packages() {
+add_package() {
     for z in $@; do
         [[ $z =~ ^# ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
     done
 }
 
-_delpackage() {
+del_package() {
     for z in $@; do
         [[ $z =~ ^# ]] || sed -i -E "s/(CONFIG_PACKAGE_.*$z)=y/# \1 is not set/" .config
     done
 }
 
-_printf() {
+output_info() {
     awk '{printf "%s %-40s %s %s %s\n" ,$1,$2,$3,$4,$5}'
 }
 
@@ -75,19 +75,19 @@ git_clone() {
         target_dir="${repo_url##*/}"
     fi
     if ! git clone -q $branch --depth=1 $repo_url $target_dir; then
-        echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | _printf
+        echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | output_info
         return 0
     fi
     rm -rf $target_dir/{.git*,README*.md,LICENSE}
-    current_dir=$(_find "package/ feeds/ target/" "$target_dir")
+    current_dir=$(find_dir "package/ feeds/ target/" "$target_dir")
     if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
         mv -f $target_dir ${current_dir%/*}
-        echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
+        echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | output_info
     else
         destination_dir="package/A"
         [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
         mv -f $target_dir $destination_dir
-        echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
+        echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | output_info
     fi
 }
 
@@ -103,28 +103,28 @@ clone_dir() {
     fi
     local temp_dir=$(mktemp -d) target_dir
     if ! git clone -q $branch --depth=1 $repo_url $temp_dir; then
-        echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | _printf
+        echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | output_info
         return 0
     fi
     for target_dir in "$@"; do
         local source_dir current_dir destination_dir
         [[ $target_dir =~ ^# ]] && continue
-        source_dir=$(_find "$temp_dir" "$target_dir")
+        source_dir=$(find_dir "$temp_dir" "$target_dir")
         [[ -d "$source_dir" ]] || \
         source_dir=$(find "$temp_dir" -maxdepth 4 -type d -name "$target_dir" -print -quit) && \
         [[ -d "$source_dir" ]] || {
-            echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
+            echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | output_info
             continue
         }
-        current_dir=$(_find "package/ feeds/ target/" "$target_dir")
+        current_dir=$(find_dir "package/ feeds/ target/" "$target_dir")
         if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
-            echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
+            echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | output_info
         else
             destination_dir="package/A"
             [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
-            echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
+            echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | output_info
         fi
     done
     rm -rf $temp_dir
@@ -142,21 +142,21 @@ clone_all() {
     fi
     local temp_dir=$(mktemp -d) target_dir
     if ! git clone -q $branch --depth=1 $repo_url $temp_dir; then
-        echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | _printf
+        echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | output_info
         return 0
     fi
     for target_dir in $(ls -l $temp_dir/$@ | awk '/^d/{print $NF}'); do
         local source_dir current_dir destination_dir
-        source_dir=$(_find "$temp_dir" "$target_dir")
-        current_dir=$(_find "package/ feeds/ target/" "$target_dir")
+        source_dir=$(find_dir "$temp_dir" "$target_dir")
+        current_dir=$(find_dir "package/ feeds/ target/" "$target_dir")
         if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
-            echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
+            echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | output_info
         else
             destination_dir="package/A"
             [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
-            echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
+            echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | output_info
         fi
     done
     rm -rf $temp_dir
@@ -219,7 +219,7 @@ config() {
 			CONFIG_TARGET_bcm47xx_mips74k_DEVICE_asus_rt-n16=y
 			EOF
 			;;
-		"armvirt-64-default")
+		"armvirt-64")
 			cat >.config<<-EOF
 			CONFIG_TARGET_armvirt=y
 			CONFIG_TARGET_armvirt_64=y
@@ -289,44 +289,50 @@ STEP_NAME='更新&安装插件'; BEGIN_TIME=$(date '+%H:%M:%S')
 status
 
 color cy "添加&替换插件"
+clone_all https://github.com/hong0980/build
 clone_all https://github.com/fw876/helloworld
 clone_all https://github.com/xiaorouji/openwrt-passwall-packages
 clone_all https://github.com/xiaorouji/openwrt-passwall
 clone_all https://github.com/xiaorouji/openwrt-passwall2
 clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
+# clone_dir https://github.com/sbwml/openwrt_helloworld xray-core v2ray-core v2ray-geodata sing-box
 
-clone_all https://github.com/hong0980/build
-clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
-clone_dir https://github.com/kiddin9/kwrt-packages luci-app-adguardhome adguardhome luci-app-bypass lua-neturl cpulimit
-clone_all https://github.com/destan19/OpenAppFilter
-clone_all https://github.com/brvphoenix/wrtbwmon
-clone_all https://github.com/linkease/istore luci
-clone_all https://github.com/ophub/luci-app-amlogic
-git_clone https://github.com/sbwml/packages_lang_golang golang
-git_clone https://github.com/zzsj0928/luci-app-pushbot
-git_clone https://github.com/yaof2/luci-app-ikoolproxy
-git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
-sed -i '/log_check/s/^/#/' $(_find "package/ feeds/" "luci-app-unblockneteasemusic")/root/etc/init.d/unblockneteasemusic
-
-if [[ "$REPO_BRANCH" =~ 18.06|master ]]; then
+[[ "$REPO_BRANCH" =~ 18.06|master ]] && {
     clone_all v5-lua https://github.com/sbwml/luci-app-mosdns
     clone_all lua https://github.com/sbwml/luci-app-alist
-    clone_all https://github.com/sirpdboy/luci-app-ddns-go
     git_clone 18.06 https://github.com/kiddin9/luci-theme-edge
     git_clone 18.06 https://github.com/jerrykuku/luci-theme-argon
     git_clone 18.06 https://github.com/jerrykuku/luci-app-argon-config
+    git_clone https://github.com/kongfl888/luci-app-adguardhome
+    clone_all https://github.com/sirpdboy/luci-app-ddns-go
     git_clone https://github.com/ximiTech/luci-app-msd_lite
     git_clone https://github.com/ximiTech/msd_lite
-    #git_clone https://github.com/kongfl888/luci-app-adguardhome
     clone_dir https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom luci-theme-infinityfreedom-ng
     clone_dir https://github.com/haiibo/packages luci-theme-opentomcat
-else
+}
+
+[[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
     clone_all https://github.com/sbwml/luci-app-mosdns
     clone_all https://github.com/sbwml/luci-app-alist
     git_clone https://github.com/kiddin9/luci-theme-edge
     git_clone https://github.com/jerrykuku/luci-theme-argon
     git_clone https://github.com/jerrykuku/luci-app-argon-config
-fi
+}
+
+[ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
+    git_clone https://github.com/sbwml/packages_lang_golang golang
+    git_clone https://github.com/zzsj0928/luci-app-pushbot
+    git_clone https://github.com/ilxp/luci-app-ikoolproxy
+    clone_all https://github.com/destan19/OpenAppFilter
+    clone_dir https://github.com/sirpdboy/luci-app-cupsd luci-app-cupsd cups
+    clone_dir https://github.com/kiddin9/kwrt-packages luci-app-bypass lua-neturl cpulimit
+    clone_all https://github.com/brvphoenix/wrtbwmon
+    clone_all https://github.com/linkease/istore luci
+    git_clone master https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic
+    sed -i '/log_check/s/^/#/' $(find_dir "package/ feeds/" "luci-app-unblockneteasemusic")/root/etc/init.d/unblockneteasemusic
+}
+
+[[ "$TARGET_DEVICE" =~ armvirt-64 ]] && clone_all https://github.com/ophub/luci-app-amlogic
 
 STEP_NAME='加载个人设置'; BEGIN_TIME=$(date '+%H:%M:%S')
 
@@ -335,6 +341,8 @@ config
 cat >>.config <<-EOF
 	CONFIG_KERNEL_BUILD_USER="buy404"
 	CONFIG_KERNEL_BUILD_DOMAIN="OpenWrt"
+	CONFIG_PACKAGE_automount=y
+	CONFIG_PACKAGE_autosamba=y
 	CONFIG_PACKAGE_luci-app-accesscontrol=y
 	CONFIG_PACKAGE_luci-app-bridge=y
 	CONFIG_PACKAGE_luci-app-cowb-speedlimit=y
@@ -354,32 +362,33 @@ cat >>.config <<-EOF
 	CONFIG_PACKAGE_luci-app-ikoolproxy=y
 	CONFIG_PACKAGE_luci-app-simplenetwork=y
 	CONFIG_PACKAGE_luci-app-opkg=y
-	CONFIG_PACKAGE_automount=y
-	CONFIG_PACKAGE_autosamba=y
 	CONFIG_PACKAGE_luci-app-diskman=y
 	CONFIG_PACKAGE_luci-app-syncdial=y
 	CONFIG_PACKAGE_luci-theme-bootstrap=y
 	CONFIG_PACKAGE_luci-app-tinynote=y
 	CONFIG_PACKAGE_luci-app-arpbind=y
 	CONFIG_PACKAGE_luci-app-wifischedule=y
+	# CONFIG_PACKAGE_luci-app-unblockmusic is not set
 	# CONFIG_PACKAGE_luci-app-wireguard is not set
 	# CONFIG_PACKAGE_luci-app-autoreboot is not set
 	# CONFIG_PACKAGE_luci-app-ddns is not set
 	# CONFIG_PACKAGE_luci-app-ssr-plus is not set
+	# CONFIG_PACKAGE_luci-app-zerotier is not set
 	# CONFIG_PACKAGE_luci-app-ipsec-vpnd is not set
 	# CONFIG_PACKAGE_luci-app-xlnetacc is not set
+	# CONFIG_PACKAGE_luci-app-uugamebooster is not set
 EOF
 
 [[ ! "$REPO_BRANCH" =~ 18.06|master ]] && {
-    _packages "
+    add_package "
     luci-app-wizard
     luci-app-log-OpenWrt-19.07
     "
 }
 
-if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
+[[ $REPO_URL =~ "coolsnowwolf" ]] && {
     # sed -i "/DISTRIB_DESCRIPTION/ {s/'$/-$SOURCE_REPO-$(date +%Y年%m月%d日)'/}" package/*/*/*/openwrt_release
-    # sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
+    sed -i "/VERSION_NUMBER/ s/if.*/if \$(VERSION_NUMBER),\$(VERSION_NUMBER),${REPO_BRANCH#*-}-SNAPSHOT)/" include/version.mk
     sed -i 's/option enabled.*/option enabled 1/' feeds/*/*/*/*/upnpd.config
     sed -i "/listen_https/ {s/^/#/g}" package/*/*/*/files/uhttpd.config
     sed -i 's/UTC/UTC-8/' Makefile
@@ -388,10 +397,10 @@ if [[ $REPO_URL =~ "coolsnowwolf" ]]; then
             s|zh_cn|zh_cn\nuci set luci.main.mediaurlbase=/luci-static/bootstrap|
             \$i sed -i 's/root::.*/root:\$1\$V4UetPzk\$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' /etc/shadow\n[ -f '/bin/bash' ] && sed -i '/\\\/ash$/s/ash/bash/' /etc/passwd
             }" $(find package/ -type f -name "*default-settings" 2>/dev/null)
-fi
+}
 
 [ "$TARGET_DEVICE" != phicomm_k2p -a "$TARGET_DEVICE" != newifi-d2 ] && {
-    _packages "
+    add_package "
     luci-app-aria2
     luci-app-cifs-mount
     luci-app-commands
@@ -429,18 +438,18 @@ mwan3=feeds/packages/net/mwan3/files/etc/config/mwan3
 [[ -f $mwan3 ]] && grep -q "8.8" $mwan3 && sed -i '/8.8/d' $mwan3
 
 # echo '<iframe src="https://ip.skk.moe/simple" style="width: 100%; border: 0"></iframe>' | \
-# tee -a {$(_find "package/ feeds/" "luci-app-vssr")/*/*/*/status_top.htm,$(_find "package/ feeds/" "luci-app-ssr-plus")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-bypass")/*/*/*/status.htm,$(_find "package/ feeds/" "luci-app-passwall")/*/*/*/global/status.htm} >/dev/null
-xb=$(_find "package/ feeds/" "luci-app-bypass")
+# tee -a {$(find_dir "package/ feeds/" "luci-app-vssr")/*/*/*/status_top.htm,$(find_dir "package/ feeds/" "luci-app-ssr-plus")/*/*/*/status.htm,$(find_dir "package/ feeds/" "luci-app-bypass")/*/*/*/status.htm,$(find_dir "package/ feeds/" "luci-app-passwall")/*/*/*/global/status.htm} >/dev/null
+xb=$(find_dir "package/ feeds/" "luci-app-bypass")
 [[ -d $xb ]] && sed -i 's/default y/default n/g' $xb/Makefile
 qBittorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*-\K\d+\.\d+\.\d+')
 libtorrent_version=$(curl -sL api.github.com/repos/userdocs/qbittorrent-nox-static/releases/latest | grep -oP 'tag_name.*v\K\d+\.\d+\.\d+')
-xc=$(_find "package/ feeds/" "qBittorrent-static")
+xc=$(find_dir "package/ feeds/" "qBittorrent-static")
 [[ -d $xc ]] && [[ $qBittorrent_version ]] && sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${qBittorrent_version:-4.6.5}_v${libtorrent_version:-2.0.10}/" $xc/Makefile
-xd=$(_find "package/ feeds/" "luci-app-turboacc")
+xd=$(find_dir "package/ feeds/" "luci-app-turboacc")
 [[ -d $xd ]] && sed -i '/hw_flow/s/1/0/;/sfe_flow/s/1/0/;/sfe_bridge/s/1/0/' $xd/root/etc/config/turboacc
-xe=$(_find "package/ feeds/" "luci-app-ikoolproxy")
+xe=$(find_dir "package/ feeds/" "luci-app-ikoolproxy")
 [[ -d $xe ]] && sed -i '/echo .*root/ s/echo /[ $time =~ [0-9]+ ] \&\& echo /' $xe/root/etc/init.d/koolproxy
-xg=$(_find "package/ feeds/" "luci-app-pushbot")
+xg=$(find_dir "package/ feeds/" "luci-app-pushbot")
 [[ -d $xg ]] && {
     sed -i "s|-c pushbot|/usr/bin/pushbot/pushbot|" $xg/luasrc/controller/pushbot.lua
     sed -i '/start()/a[ "$(uci get pushbot.@pushbot[0].pushbot_enable)" -eq "0" ] && return 0' $xg/root/etc/init.d/pushbot
@@ -472,7 +481,7 @@ case "$TARGET_DEVICE" in
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        _packages "
+        add_package "
         luci-app-adbyby-plus
         #luci-app-amule
         luci-app-deluge
@@ -502,7 +511,7 @@ case "$TARGET_DEVICE" in
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        _packages "
+        add_package "
         luci-app-cpufreq
         luci-app-adbyby-plus
         luci-app-dockerman
@@ -527,19 +536,19 @@ case "$TARGET_DEVICE" in
         ;;
     "newifi-d2")
         FIRMWARE_TYPE="sysupgrade"
-        _packages "luci-app-easymesh"
-        _delpackage "ikoolproxy openclash transmission softwarecenter aria2 vssr adguardhome"
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        add_package "luci-app-easymesh"
+        del_package "ikoolproxy openclash transmission softwarecenter aria2 vssr adguardhome"
         ;;
     "phicomm_k2p")
         FIRMWARE_TYPE="sysupgrade"
-        _packages "luci-app-easymesh"
-        _delpackage "samba4 luci-app-usb-printer luci-app-cifs-mount diskman cupsd autosamba automount"
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
+        add_package "luci-app-easymesh"
+        del_package "samba4 luci-app-usb-printer luci-app-cifs-mount diskman cupsd autosamba automount"
         ;;
     "asus_rt-n16")
         FIRMWARE_TYPE="n16"
@@ -547,26 +556,31 @@ case "$TARGET_DEVICE" in
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
         ;;
-    "armvirt-64-default")
-        FIRMWARE_TYPE="$TARGET_DEVICE"
-        sed -i '/easymesh/d' .config
+    "armvirt-64")
+        FIRMWARE_TYPE="generic-rootfs"
         [[ -n $DEFAULT_IP ]] && \
         sed -i '/n) ipad/s/".*"/"'"$DEFAULT_IP"'"/' $config_generate || \
         sed -i '/n) ipad/s/".*"/"192.168.2.1"/' $config_generate
-        _packages "attr bash blkid brcmfmac-firmware-43430-sdio brcmfmac-firmware-43455-sdio
+        add_package "
+        attr bash blkid brcmfmac-firmware-43430-sdio brcmfmac-firmware-43455-sdio
         btrfs-progs cfdisk chattr curl dosfstools e2fsprogs f2fs-tools f2fsck fdisk getopt
         hostpad-common htop install-program iperf3 kmod-brcmfmac kmod-brcmutil kmod-cfg80211
         kmod-fs-exfat kmod-fs-ext4 kmod-fs-vfat kmod-mac80211 kmod-rt2800-usb kmod-usb-net
         kmod-usb-net-asix-ax88179 kmod-usb-net-rtl8150 kmod-usb-net-rtl8152 kmod-usb-storage
         kmod-usb-storage-extras kmod-usb-storage-uas kmod-usb2 kmod-usb3 lm-sensors losetup
-        lsattr lsblk lscpu lsscsi luci-app-adguardhome luci-app-cpufreq luci-app-dockerman
-        luci-app-qbittorrent mkf2fs ntfs-3g parted pv python3 resize2fs tune2fs unzip
-        uuidgen wpa-cli wpad wpad-basic xfs-fsck xfs-mkf"
+        lsattr lsblk lscpu lsscsi mkf2fs ntfs-3g parted pv python3 resize2fs tune2fs unzip
+        uuidgen wpa-cli wpad wpad-basic xfs-fsck xfs-mkf
+        luci-app-adguardhome
+        luci-app-cpufreq
+        luci-app-dockerman
+        luci-app-qbittorrent
+        "
+        sed -i '/easymesh/d' .config
         # wget -qO feeds/luci/applications/luci-app-qbittorrent/Makefile https://raw.githubusercontent.com/immortalwrt/luci/openwrt-18.06/applications/luci-app-qbittorrent/Makefile
         # sed -i 's/-Enhanced-Edition//' feeds/luci/applications/luci-app-qbittorrent/Makefile
-        sed -i 's/arm/arm||TARGET_armvirt_64/g' $(_find "package/ feeds/" "luci-app-cpufreq")/Makefile
+        sed -i 's/arm/arm||TARGET_armvirt_64/g' $(find_dir "package/ feeds/" "luci-app-cpufreq")/Makefile
         sed -i "s/default 160/default $PART_SIZE/" config/Config-images.in
-        sed -i 's/services/system/; s/00//' $(_find "package/ feeds/" "luci-app-cpufreq")/luasrc/controller/cpufreq.lua
+        sed -i 's/services/system/; s/00//' $(find_dir "package/ feeds/" "luci-app-cpufreq")/luasrc/controller/cpufreq.lua
         [ -d ../opt/openwrt_packit ] && {
         sed -i '{
         s|mv |mv -v |
@@ -578,7 +592,7 @@ case "$TARGET_DEVICE" in
         ;;
 esac
 
-sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' $(_find "package/ feeds/" "luci-app-passwall")/Makefile
+sed -i '/config PACKAGE_\$(PKG_NAME)_INCLUDE_SingBox/,$ { /default y/ { s/default y/default n/; :loop; n; b loop } }' $(find_dir "package/ feeds/" "luci-app-passwall")/Makefile
 sed -i '/bridged/d; /deluge/d; /transmission/d' .config
 
 sed -i \

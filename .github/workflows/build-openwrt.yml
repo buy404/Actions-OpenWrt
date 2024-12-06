@@ -25,7 +25,7 @@ on:
         required: true
         default: 'x86_64'
         type: choice
-        options: [x86_64, r1-plus-lts, r2c, r2s, r4s, newifi-d2, asus_rt-n16, phicomm_k2p, armvirt-64-default]
+        options: [x86_64, r1-plus-lts, r2c, r2s, r4s, newifi-d2, asus_rt-n16, phicomm_k2p, armvirt-64]
 
       ip:
         description: '设置默认登录IP'
