@@ -287,7 +287,7 @@ if (grep -q "$CACHE_NAME" xa || grep -q "$CACHE_NAME" xc); then
                 [ -d $GITHUB_WORKSPACE/output ] || mkdir $GITHUB_WORKSPACE/output
                 cp *.tzst $GITHUB_WORKSPACE/output && echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV
             fi
-            sed -i 's/ $(tool.*\/stamp-compile)//' Makefile && rm xa xc
+            rm xa xc && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
         }
         [ -d staging_dir ]; status
     }
