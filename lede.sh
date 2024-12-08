@@ -280,15 +280,17 @@ if (grep -q "$CACHE_NAME" xa || grep -q "$CACHE_NAME" xc); then
     grep -q "$CACHE_NAME" xa && \
     wget -qc -t=3 $(grep "$CACHE_NAME" xa) || wget -qc -t=3 $(grep "$CACHE_NAME" xc)
     [ -e *.tzst ]; status
-    STEP_NAME='部署toolchain编译工具'; BEGIN_TIME=$(date '+%H:%M:%S')
-    (tar -I unzstd -xf *.tzst || tar -xf *.tzst) && {
-        if ! grep -q "$CACHE_NAME" xa; then
-	    mkdir $GITHUB_WORKSPACE/output
-            cp *.tzst $GITHUB_WORKSPACE/output && echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV
-        fi
+    [ -e *.tzst ] && {
+        STEP_NAME='部署toolchain编译工具'; BEGIN_TIME=$(date '+%H:%M:%S')
+        (tar -I unzstd -xf *.tzst || tar -xf *.tzst) && {
+            if ! grep -q "$CACHE_NAME" xa; then
+                [ -d $GITHUB_WORKSPACE/output ] || mkdir $GITHUB_WORKSPACE/output
+                cp *.tzst $GITHUB_WORKSPACE/output && echo "OUTPUT_RELEASE=true" >>$GITHUB_ENV
+            fi
+            sed -i 's/ $(tool.*\/stamp-compile)//' Makefile && rm xa xc
+        }
+        [ -d staging_dir ]; status
     }
-    [ -d staging_dir ] && sed -i 's/ $(tool.*\/stamp-compile)//' Makefile
-    status; rm xa xc
 else
     echo "REBUILD_TOOLCHAIN=true" >>$GITHUB_ENV
 fi
