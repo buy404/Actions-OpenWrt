@@ -58,7 +58,7 @@ del_package() {
 }
 
 output_info() {
-    IFS=' ' read -r param1 param2 param3 param4 param5 <<< "$1"
+    read -r param1 param2 param3 param4 param5 <<< "$1"
     printf "%s %-40s %s %s %s\n" "$param1" "$param2" "$param3" "$param4" "$param5"
 }
 
