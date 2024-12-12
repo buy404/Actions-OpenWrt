@@ -44,12 +44,14 @@ find_dir() {
 }
 
 add_package() {
+    local z
     for z in $@; do
         [[ $z =~ ^# ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
     done
 }
 
 del_package() {
+    local z
     for z in $@; do
         [[ $z =~ ^# ]] || sed -i -E "s/(CONFIG_PACKAGE_.*$z)=y/# \1 is not set/" .config
     done
