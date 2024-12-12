@@ -58,9 +58,9 @@ del_package() {
 }
 
 print_info() {
-    #read -r param1 param2 param3 param4 param5 <<< "$1"
-    #printf "%s %-40s %s %s %s\n" "$param1" "$param2" "$param3" "$param4" "$param5"
     printf "%s %-40s %s %s %s\n" $1 $2 $3 $4 $5
+    # read -r param1 param2 param3 param4 param5 <<< $1
+    # printf "%s %-40s %s %s %s\n" $param1 $param2 $param3 $param4 $param5
 }
 
 git_clone() {
