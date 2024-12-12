@@ -79,7 +79,7 @@ git_clone() {
         target_dir="${repo_url##*/}"
     fi
     git clone -q $branch --depth=1 $repo_url $target_dir 2>/dev/null || {
-        echo -e "$(color cr 拉取) $repo_url [ $(color cr ✕) ]" | output_info
+        output_info "$(color cr 拉取) $repo_url [ $(color cr ✕) ]"
         return 0
     }
     rm -rf $target_dir/{.git*,README*.md,LICENSE}
