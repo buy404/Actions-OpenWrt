@@ -44,14 +44,12 @@ find_dir() {
 }
 
 add_package() {
-    local z
     for z in $@; do
         [[ $z =~ ^# ]] || echo "CONFIG_PACKAGE_$z=y" >>.config
     done
 }
 
 del_package() {
-    local z
     for z in $@; do
         [[ $z =~ ^# ]] || sed -i -E "s/(CONFIG_PACKAGE_.*$z)=y/# \1 is not set/" .config
     done
@@ -335,6 +333,8 @@ clone_dir https://github.com/vernesong/OpenClash luci-app-openclash
 }
 
 [[ "$TARGET_DEVICE" =~ armvirt-64 ]] && clone_all https://github.com/ophub/luci-app-amlogic
+
+echo "$z"gdch
 
 step_name='加载个人设置'; begin_time=$(date '+%H:%M:%S')
 
