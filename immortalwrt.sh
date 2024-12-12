@@ -28,14 +28,14 @@ color() {
 
 status() {
     local check=$? end_time=$(date '+%H:%M:%S') total_time
-    total_time=" ==> 用时 $[$(date +%s -d "$end_time") - $(date +%s -d "$begin_time")] 秒"
+    total_time="==> 用时 $[$(date +%s -d $end_time) - $(date +%s -d $begin_time)] 秒"
     [[ $total_time =~ [0-9]+ ]] || total_time=""
     if [[ $check = 0 ]]; then
         printf "%-62s %s %s %s %s %s %s %s\n" \
-        $(echo -e "$(color cy $step_name) [ $(color cg ✔) ]\e[1;39m${total_time}")
+        $(color cy $step_name) [ $(color cg ✔) ] $total_time
     else
         printf "%-62s %s %s %s %s %s %s %s\n" \
-        $(echo -e "$(color cy $step_name) [ $(color cr ✕) ]\e[1;39m${total_time}")
+        $(color cy $step_name) [ $(color cr ✕) ] $total_time
     fi
 }
 
@@ -57,7 +57,7 @@ del_package() {
     done
 }
 
-output_info() {
+print_info() {
     #read -r param1 param2 param3 param4 param5 <<< "$1"
     #printf "%s %-40s %s %s %s\n" "$param1" "$param2" "$param3" "$param4" "$param5"
     printf "%s %-40s %s %s %s\n" $1 $2 $3 $4 $5
@@ -80,19 +80,19 @@ git_clone() {
         target_dir="${repo_url##*/}"
     fi
     git clone -q $branch --depth=1 $repo_url $target_dir 2>/dev/null || {
-        output_info $(color cr 拉取) $repo_url [ $(color cr ✕) ]
+        print_info $(color cr 拉取) $repo_url [ $(color cr ✕) ]
         return 0
     }
     rm -rf $target_dir/{.git*,README*.md,LICENSE}
     current_dir=$(find_dir "package/ feeds/ target/" "$target_dir")
     if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
         mv -f $target_dir ${current_dir%/*}
-        output_info $(color cg 替换) $target_dir [ $(color cg ✔) ]
+        print_info $(color cg 替换) $target_dir [ $(color cg ✔) ]
     else
         destination_dir="package/A"
         [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
         mv -f $target_dir $destination_dir
-        output_info $(color cb 添加) $target_dir [ $(color cb ✔) ]
+        print_info $(color cb 添加) $target_dir [ $(color cb ✔) ]
     fi
 }
 
@@ -108,7 +108,7 @@ clone_dir() {
     fi
     local temp_dir=$(mktemp -d) target_dir
     git clone -q $branch --depth=1 $repo_url $temp_dir 2>/dev/null || {
-        output_info $(color cr 拉取) $repo_url [ $(color cr ✕) ]
+        print_info $(color cr 拉取) $repo_url [ $(color cr ✕) ]
         return 0
     }
     for target_dir in "$@"; do
@@ -118,18 +118,18 @@ clone_dir() {
         [[ -d "$source_dir" ]] || \
         source_dir=$(find "$temp_dir" -maxdepth 4 -type d -name "$target_dir" -print -quit) && \
         [[ -d "$source_dir" ]] || {
-            output_info $(color cr 查找) $target_dir [ $(color cr ✕) ]
+            print_info $(color cr 查找) $target_dir [ $(color cr ✕) ]
             continue
         }
         current_dir=$(find_dir "package/ feeds/ target/" "$target_dir")
         if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
-            output_info $(color cg 替换) $target_dir [ $(color cg ✔) ]
+            print_info $(color cg 替换) $target_dir [ $(color cg ✔) ]
         else
             destination_dir="package/A"
             [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
-            output_info $(color cb 添加) $target_dir [ $(color cb ✔) ]
+            print_info $(color cb 添加) $target_dir [ $(color cb ✔) ]
         fi
     done
     rm -rf $temp_dir
@@ -147,7 +147,7 @@ clone_all() {
     fi
     local temp_dir=$(mktemp -d) target_dir
     git clone -q $branch --depth=1 $repo_url $temp_dir 2>/dev/null || {
-        output_info $(color cr 拉取) $repo_url [ $(color cr ✕) ]
+        print_info $(color cr 拉取) $repo_url [ $(color cr ✕) ]
         return 0
     }
     for target_dir in $(ls -l $temp_dir/$@ | awk '/^d/{print $NF}'); do
@@ -156,12 +156,12 @@ clone_all() {
         current_dir=$(find_dir "package/ feeds/ target/" "$target_dir")
         if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
-            output_info $(color cg 替换) $target_dir [ $(color cg ✔) ]
+            print_info $(color cg 替换) $target_dir [ $(color cg ✔) ]
         else
             destination_dir="package/A"
             [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
-            output_info $(color cb 添加) $target_dir [ $(color cb ✔) ]
+            print_info $(color cb 添加) $target_dir [ $(color cb ✔) ]
         fi
     done
     rm -rf $temp_dir
