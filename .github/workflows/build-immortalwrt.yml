@@ -139,7 +139,7 @@ jobs:
         sudo chown -R runner:runner $GITHUB_WORKSPACE && df -hT
 
     - name: Checkout Repo
-      uses: actions/checkout@v4.2.0
+      uses: actions/checkout@v4
 
     - name: Load Compile Script
       run: |
@@ -167,7 +167,7 @@ jobs:
 
     - name: Upload Toolchain To Release
       if: env.OUTPUT_RELEASE == 'true'
-      uses: softprops/action-gh-release@v2.0.8
+      uses: softprops/action-gh-release@v2
       with:
         name: ${{ env.EMOJI }} toolchain-cache ${{ env.EMOJI }}
         tag_name: toolchain-cache
@@ -193,7 +193,7 @@ jobs:
 
     - name: Upload Bin Directory
       if: steps.compile.conclusion == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      uses: actions/upload-artifact@v4.4.0
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.SOURCE_REPO }}-${{ env.LITE_BRANCH }}-${{ env.TARGET_DEVICE }}-bin-${{ env.FILE_DATE }}
         path: ${{ env.OPENWRT_PATH }}/bin
@@ -215,14 +215,14 @@ jobs:
 
     - name: Upload Firmware To Artifact
       if: steps.compile.conclusion == 'success' && github.event.inputs.artifact == 'true'
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.SOURCE_REPO }}-${{ env.LITE_BRANCH }}-${{ env.TARGET_DEVICE }}-firmware-${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE_PATH }}
 
     - name: Upload Firmware To Release
       if: steps.organize.conclusion == 'success' && github.event.inputs.release == 'true'
-      uses: softprops/action-gh-release@v2.0.8
+      uses: softprops/action-gh-release@v2
       with:
         name: ${{ env.EMOJI }} ${{ env.FILE_DATE }} ${{ env.SOURCE_REPO }}-${{ env.TARGET_DEVICE }} ${{ env.EMOJI }}
         tag_name: ${{ env.FILE_DATE }}-${{ env.SOURCE_REPO }}-${{ env.TARGET_DEVICE }}

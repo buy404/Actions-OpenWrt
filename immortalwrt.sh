@@ -753,4 +753,4 @@ sed -i "s/\$(VERSION_DIST_SANITIZED)/$SOURCE_REPO-${REPO_BRANCH#*-}-$KERNEL_VERS
 echo "UPLOAD_BIN_DIR=false" >>$GITHUB_ENV
 echo "FIRMWARE_TYPE=$FIRMWARE_TYPE" >>$GITHUB_ENV
 
-echo -e "\e[1;35m脚本运行完成！\e[0m"
+color cp "脚本运行完成！"
